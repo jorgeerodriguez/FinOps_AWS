@@ -1,0 +1,215 @@
+,Month,Year,Name,Account,Service,Cost
+0,DEC,2024,Entercom Communications,724972922289,AWS Amplify,0.0037209692
+1,DEC,2024,Entercom Communications,724972922289,AWS Backup,2.6282926351
+2,DEC,2024,Entercom Communications,724972922289,AWS Backup,170.9935842547
+3,DEC,2024,Entercom Communications,724972922289,AWS Budgets,0.455
+4,DEC,2024,Entercom Communications,724972922289,AWS Certificate Manager,1456.0
+5,DEC,2024,Entercom Communications,724972922289,AWS CloudFormation,0.0
+6,DEC,2024,Entercom Communications,724972922289,AWS CloudShell,3.448e-07
+7,DEC,2024,Entercom Communications,724972922289,AWS CloudTrail,6119.7998849507
+8,DEC,2024,Entercom Communications,724972922289,AWS Config,5775.933345
+9,DEC,2024,Entercom Communications,724972922289,AWS Cost Explorer,10.6743
+10,DEC,2024,Entercom Communications,724972922289,AWS DataSync,8.7972584047
+11,DEC,2024,Entercom Communications,724972922289,AWS Database Migration Service,2161.3701434756
+12,DEC,2024,Entercom Communications,724972922289,AWS Directory Service,494.3633097112
+13,DEC,2024,Entercom Communications,724972922289,AWS Elemental MediaLive,27.0816
+14,DEC,2024,Entercom Communications,724972922289,AWS Elemental MediaStore,0.0001746912
+15,DEC,2024,Entercom Communications,724972922289,AWS End User Messaging,2.7299999712
+16,DEC,2024,Entercom Communications,724972922289,AWS Global Accelerator,0.0
+17,DEC,2024,Entercom Communications,724972922289,AWS Global Accelerator,33.857042614
+18,DEC,2024,Entercom Communications,724972922289,AWS Glue,13.9734430836
+19,DEC,2024,Entercom Communications,724972922289,AWS Key Management Service,172.9090999966
+20,DEC,2024,Entercom Communications,724972922289,AWS Key Management Service,1.8351867072
+21,DEC,2024,Entercom Communications,724972922289,AWS Key Management Service,0.9130656486
+22,DEC,2024,Entercom Communications,724972922289,AWS Key Management Service,0.9171826452
+23,DEC,2024,Entercom Communications,724972922289,AWS Key Management Service,77.8585988352
+24,DEC,2024,Entercom Communications,724972922289,AWS Key Management Service,61.31993298
+25,DEC,2024,Entercom Communications,724972922289,AWS Key Management Service,1.8175537938
+26,DEC,2024,Entercom Communications,724972922289,AWS Key Management Service,1.8114682323
+27,DEC,2024,Entercom Communications,724972922289,AWS Key Management Service,1.8290579355
+28,DEC,2024,Entercom Communications,724972922289,AWS Lambda,3856.3945183289
+29,DEC,2024,Entercom Communications,724972922289,AWS Lambda,21.3907917094
+30,DEC,2024,Entercom Communications,724972922289,AWS Lambda,37.3468342359
+31,DEC,2024,Entercom Communications,724972922289,AWS Lambda,1.8613040867
+32,DEC,2024,Entercom Communications,724972922289,AWS Lambda,5.8129951187
+33,DEC,2024,Entercom Communications,724972922289,AWS Lambda,14.6601848575
+34,DEC,2024,Entercom Communications,724972922289,AWS Lambda,2.7786802419
+35,DEC,2024,Entercom Communications,724972922289,AWS Lambda,0.0002101046
+36,DEC,2024,Entercom Communications,724972922289,AWS Lambda,2.7752750242
+37,DEC,2024,Entercom Communications,724972922289,AWS Secrets Manager,120.642089333
+38,DEC,2024,Entercom Communications,724972922289,AWS Secrets Manager,38.39485195
+39,DEC,2024,Entercom Communications,724972922289,AWS Secrets Manager,36.03298335
+40,DEC,2024,Entercom Communications,724972922289,AWS Security Hub,695.5604838
+41,DEC,2024,Entercom Communications,724972922289,AWS Service Catalog,0.0
+42,DEC,2024,Entercom Communications,724972922289,AWS Step Functions,0.0022237208
+43,DEC,2024,Entercom Communications,724972922289,AWS Support (Enterprise),48256.117
+44,DEC,2024,Entercom Communications,724972922289,AWS Systems Manager,0.14236495
+45,DEC,2024,Entercom Communications,724972922289,AWS Transfer Family,203.7500595816
+46,DEC,2024,Entercom Communications,724972922289,AWS WAF,118.3437147261
+47,DEC,2024,Entercom Communications,724972922289,AWS WAF,11.26659219
+48,DEC,2024,Entercom Communications,724972922289,AWS WAF,1317.45054672
+49,DEC,2024,Entercom Communications,724972922289,AWS X-Ray,49.72559956
+50,DEC,2024,Entercom Communications,724972922289,Amazon API Gateway,95.627764598
+51,DEC,2024,Entercom Communications,724972922289,Amazon API Gateway,5.81115e-05
+52,DEC,2024,Entercom Communications,724972922289,Amazon Athena,0.01119755
+53,DEC,2024,Entercom Communications,724972922289,Amazon CloudFront,15653.2039689467
+54,DEC,2024,Entercom Communications,724972922289,Amazon CloudFront,2.4327326906
+55,DEC,2024,Entercom Communications,724972922289,Amazon CloudFront,1.6039851689
+56,DEC,2024,Entercom Communications,724972922289,Amazon CloudFront,4995.2887963102
+57,DEC,2024,Entercom Communications,724972922289,Amazon CloudFront,0.0388872284
+58,DEC,2024,Entercom Communications,724972922289,Amazon CloudFront,1.0707e-06
+59,DEC,2024,Entercom Communications,724972922289,Amazon Cognito,89.6259
+60,DEC,2024,Entercom Communications,724972922289,Amazon Detective,284.6323087083
+61,DEC,2024,Entercom Communications,724972922289,Amazon DevOps Guru,0.0
+62,DEC,2024,Entercom Communications,724972922289,Amazon DocumentDB (with MongoDB compatibility),0.1456326432
+63,DEC,2024,Entercom Communications,724972922289,Amazon DocumentDB (with MongoDB compatibility),374.4209375212
+64,DEC,2024,Entercom Communications,724972922289,Amazon DocumentDB (with MongoDB compatibility),315.4209794231
+65,DEC,2024,Entercom Communications,724972922289,Amazon DynamoDB,139.476943365
+66,DEC,2024,Entercom Communications,724972922289,Amazon DynamoDB,2.782416
+67,DEC,2024,Entercom Communications,724972922289,Amazon DynamoDB,40.9660765222
+68,DEC,2024,Entercom Communications,724972922289,Amazon DynamoDB,114.7552003309
+69,DEC,2024,Entercom Communications,724972922289,Amazon DynamoDB,2.7824160597
+70,DEC,2024,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),161.031517358
+71,DEC,2024,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),0.0333139392
+72,DEC,2024,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),0.1013141256
+73,DEC,2024,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),0.3658387128
+74,DEC,2024,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),716.3038202685
+75,DEC,2024,Entercom Communications,724972922289,Amazon ElastiCache,17043.23439
+76,DEC,2024,Entercom Communications,724972922289,Amazon ElastiCache,296.54352
+77,DEC,2024,Entercom Communications,724972922289,Amazon ElastiCache,8116.20264
+78,DEC,2024,Entercom Communications,724972922289,Amazon ElastiCache,422.47296
+79,DEC,2024,Entercom Communications,724972922289,Amazon ElastiCache,5111.81762
+80,DEC,2024,Entercom Communications,724972922289,Amazon ElastiCache,507.78
+81,DEC,2024,Entercom Communications,724972922289,EC2 - Other,37359.150944252
+82,DEC,2024,Entercom Communications,724972922289,EC2 - Other,0.7353377964
+83,DEC,2024,Entercom Communications,724972922289,EC2 - Other,0.0003495442
+84,DEC,2024,Entercom Communications,724972922289,EC2 - Other,30.4668076438
+85,DEC,2024,Entercom Communications,724972922289,EC2 - Other,1017.3524683342
+86,DEC,2024,Entercom Communications,724972922289,EC2 - Other,0.7834362061
+87,DEC,2024,Entercom Communications,724972922289,EC2 - Other,21.2624482195
+88,DEC,2024,Entercom Communications,724972922289,EC2 - Other,1430.5374831833
+89,DEC,2024,Entercom Communications,724972922289,EC2 - Other,58.1553138322
+90,DEC,2024,Entercom Communications,724972922289,EC2 - Other,6483.4017955121
+91,DEC,2024,Entercom Communications,724972922289,EC2 - Other,696.1967625023
+92,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,16839.4317367643
+93,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,0.0
+94,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,4.4592e-06
+95,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,389.3040063476
+96,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,0.0
+97,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,794.3817564525
+98,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,1243.8228471175
+99,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,69440.9552181288
+100,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,850.4800754562
+101,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Container Service,10038.5104147815
+102,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Container Service for Kubernetes,1587.4251492301
+103,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Container Service for Kubernetes,541.632
+104,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Container Service for Kubernetes,609.336
+105,DEC,2024,Entercom Communications,724972922289,Amazon Elastic File System,1756.4717129189
+106,DEC,2024,Entercom Communications,724972922289,Amazon Elastic File System,4.144587408
+107,DEC,2024,Entercom Communications,724972922289,Amazon Elastic File System,54.9336215176
+108,DEC,2024,Entercom Communications,724972922289,Amazon Elastic File System,10.6338370992
+109,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Load Balancing,8924.0349096127
+110,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Load Balancing,15.2353499922
+111,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Load Balancing,22.1993762852
+112,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Load Balancing,76.3137390149
+113,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Load Balancing,268.2756761225
+114,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Load Balancing,99.741387738
+115,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Load Balancing,2054.152318893
+116,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Load Balancing,15.2334
+117,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Load Balancing,17.0663941501
+118,DEC,2024,Entercom Communications,724972922289,Amazon Elastic Load Balancing,107.5781931521
+119,DEC,2024,Entercom Communications,724972922289,Amazon Glacier,2.3485188902
+120,DEC,2024,Entercom Communications,724972922289,Amazon GuardDuty,4235.8687417731
+121,DEC,2024,Entercom Communications,724972922289,Amazon Inspector,21.021
+122,DEC,2024,Entercom Communications,724972922289,Amazon Kinesis,121.1444663142
+123,DEC,2024,Entercom Communications,724972922289,Amazon Kinesis Firehose,28.2585670111
+124,DEC,2024,Entercom Communications,724972922289,Amazon Lightsail,9.3172653872
+125,DEC,2024,Entercom Communications,724972922289,Amazon Location Service,0.02643914
+126,DEC,2024,Entercom Communications,724972922289,Amazon MQ,60.7932598446
+127,DEC,2024,Entercom Communications,724972922289,Amazon MQ,196.3004742474
+128,DEC,2024,Entercom Communications,724972922289,Amazon MQ,195.3759634999
+129,DEC,2024,Entercom Communications,724972922289,Amazon Macie,2.04059856
+130,DEC,2024,Entercom Communications,724972922289,Amazon Managed Grafana,8.19
+131,DEC,2024,Entercom Communications,724972922289,Amazon Managed Grafana,8.19
+132,DEC,2024,Entercom Communications,724972922289,Amazon Managed Streaming for Apache Kafka,133.3203156098
+133,DEC,2024,Entercom Communications,724972922289,Amazon Managed Streaming for Apache Kafka,187.4221439472
+134,DEC,2024,Entercom Communications,724972922289,Amazon Managed Workflows for Apache Airflow,6375.4982534062
+135,DEC,2024,Entercom Communications,724972922289,Amazon Managed Workflows for Apache Airflow,1338.99461495
+136,DEC,2024,Entercom Communications,724972922289,Amazon Managed Workflows for Apache Airflow,2678.224710133
+137,DEC,2024,Entercom Communications,724972922289,Amazon Neptune,4.3989038807
+138,DEC,2024,Entercom Communications,724972922289,Amazon OpenSearch Service,16439.6546645186
+139,DEC,2024,Entercom Communications,724972922289,Amazon OpenSearch Service,12006.5273421241
+140,DEC,2024,Entercom Communications,724972922289,Amazon OpenSearch Service,22269.6862098175
+141,DEC,2024,Entercom Communications,724972922289,Amazon OpenSearch Service,153.3112416757
+142,DEC,2024,Entercom Communications,724972922289,Amazon Personalize,2213.9210209644
+143,DEC,2024,Entercom Communications,724972922289,Amazon QuickSight,32.7599994312
+144,DEC,2024,Entercom Communications,724972922289,Amazon Redshift,1775.8355229787
+145,DEC,2024,Entercom Communications,724972922289,Amazon Registrar,42.0
+146,DEC,2024,Entercom Communications,724972922289,Amazon Relational Database Service,89143.8595150039
+147,DEC,2024,Entercom Communications,724972922289,Amazon Relational Database Service,2353.8878607324
+148,DEC,2024,Entercom Communications,724972922289,Amazon Relational Database Service,3750.5458715634
+149,DEC,2024,Entercom Communications,724972922289,Amazon Relational Database Service,857.9627701485
+150,DEC,2024,Entercom Communications,724972922289,Amazon Relational Database Service,7864.0071910881
+151,DEC,2024,Entercom Communications,724972922289,Amazon Relational Database Service,578.2875789197
+152,DEC,2024,Entercom Communications,724972922289,Amazon Route 53,1568.6807589066
+153,DEC,2024,Entercom Communications,724972922289,Amazon Route 53,0.179840388
+154,DEC,2024,Entercom Communications,724972922289,Amazon Route 53,0.091
+155,DEC,2024,Entercom Communications,724972922289,Amazon Route 53,0.091
+156,DEC,2024,Entercom Communications,724972922289,Amazon Route 53,0.455
+157,DEC,2024,Entercom Communications,724972922289,Amazon Route 53,0.091124124
+158,DEC,2024,Entercom Communications,724972922289,Amazon Route 53,14.492542246
+159,DEC,2024,Entercom Communications,724972922289,Amazon Route 53,11.550082362
+160,DEC,2024,Entercom Communications,724972922289,Amazon Route 53,0.091111384
+161,DEC,2024,Entercom Communications,724972922289,Amazon Route 53,0.091044226
+162,DEC,2024,Entercom Communications,724972922289,Amazon Route 53,0.091
+163,DEC,2024,Entercom Communications,724972922289,Amazon SageMaker,5338.9981574113
+164,DEC,2024,Entercom Communications,724972922289,Amazon Simple Email Service,10.7440803118
+165,DEC,2024,Entercom Communications,724972922289,Amazon Simple Notification Service,24.7422942951
+166,DEC,2024,Entercom Communications,724972922289,Amazon Simple Notification Service,0.0100872957
+167,DEC,2024,Entercom Communications,724972922289,Amazon Simple Notification Service,0.001547455
+168,DEC,2024,Entercom Communications,724972922289,Amazon Simple Notification Service,0.00106834
+169,DEC,2024,Entercom Communications,724972922289,Amazon Simple Notification Service,0.00047684
+170,DEC,2024,Entercom Communications,724972922289,Amazon Simple Queue Service,38.5314735101
+171,DEC,2024,Entercom Communications,724972922289,Amazon Simple Queue Service,0.0001114537
+172,DEC,2024,Entercom Communications,724972922289,Amazon Simple Queue Service,1.0673061174
+173,DEC,2024,Entercom Communications,724972922289,Amazon Simple Queue Service,1.4162728579
+174,DEC,2024,Entercom Communications,724972922289,Amazon Simple Storage Service,51962.7361242158
+175,DEC,2024,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0997548177
+176,DEC,2024,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0009702427
+177,DEC,2024,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0759116961
+178,DEC,2024,Entercom Communications,724972922289,Amazon Simple Storage Service,9.3821727101
+179,DEC,2024,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0010296889
+180,DEC,2024,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0029502335
+181,DEC,2024,Entercom Communications,724972922289,Amazon Simple Storage Service,20.640396998
+182,DEC,2024,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0765262017
+183,DEC,2024,Entercom Communications,724972922289,Amazon Simple Storage Service,2088.1983208387
+184,DEC,2024,Entercom Communications,724972922289,Amazon Simple Storage Service,2.9182550327
+185,DEC,2024,Entercom Communications,724972922289,Amazon Simple Storage Service,15063.6187421428
+186,DEC,2024,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0008397436
+187,DEC,2024,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0037721167
+188,DEC,2024,Entercom Communications,724972922289,Amazon Simple Workflow Service,1.0727e-06
+189,DEC,2024,Entercom Communications,724972922289,Amazon SimpleDB,1.2627e-05
+190,DEC,2024,Entercom Communications,724972922289,Amazon Virtual Private Cloud,14147.1243880507
+191,DEC,2024,Entercom Communications,724972922289,Amazon Virtual Private Cloud,3.3852
+192,DEC,2024,Entercom Communications,724972922289,Amazon Virtual Private Cloud,109.721747244
+193,DEC,2024,Entercom Communications,724972922289,Amazon Virtual Private Cloud,3.3852
+194,DEC,2024,Entercom Communications,724972922289,Amazon Virtual Private Cloud,149.6228339315
+195,DEC,2024,Entercom Communications,724972922289,Amazon Virtual Private Cloud,94.2898928791
+196,DEC,2024,Entercom Communications,724972922289,Amazon Virtual Private Cloud,6.7704
+197,DEC,2024,Entercom Communications,724972922289,Amazon WorkSpaces,281.4174999382
+198,DEC,2024,Entercom Communications,724972922289,AmazonCloudWatch,16605.3110896918
+199,DEC,2024,Entercom Communications,724972922289,AmazonCloudWatch,2.164185513
+200,DEC,2024,Entercom Communications,724972922289,AmazonCloudWatch,2.1663871182
+201,DEC,2024,Entercom Communications,724972922289,AmazonCloudWatch,854.01901289
+202,DEC,2024,Entercom Communications,724972922289,AmazonCloudWatch,4.3327742364
+203,DEC,2024,Entercom Communications,724972922289,AmazonCloudWatch,3869.4818058634
+204,DEC,2024,Entercom Communications,724972922289,AmazonCloudWatch,4.3327742364
+205,DEC,2024,Entercom Communications,724972922289,AmazonWorkMail,178.3599998544
+206,DEC,2024,Entercom Communications,724972922289,Apache Kafka® & Apache Flink® on Confluent Cloud™ - Annual Commits,281494.33
+207,DEC,2024,Entercom Communications,724972922289,Aviatrix Secure Networking Platform Metered - 24x7 Support with Copilot,0.585
+208,DEC,2024,Entercom Communications,724972922289,CloudWatch Events,1.366392352
+209,DEC,2024,Entercom Communications,724972922289,CrowdStrike Falcon Endpoint Protection,80560.223
+210,DEC,2024,Entercom Communications,724972922289,Datadog,494544.0
+211,DEC,2024,Entercom Communications,724972922289,Docker Compose Server on Ubuntu Server 20.04,22.32
+212,DEC,2024,Entercom Communications,724972922289,Savings Plans for AWS Compute usage,60933.6
+213,DEC,2024,Entercom Communications,724972922289,Tax,60142.71

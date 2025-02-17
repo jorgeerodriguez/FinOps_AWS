@@ -1,0 +1,223 @@
+,Month,Year,Name,Account,Service,Cost
+0,SEP,2022,Entercom Communications,724972922289,AWS Backup,2.8584096696
+1,SEP,2022,Entercom Communications,724972922289,AWS Backup,1.2e-08
+2,SEP,2022,Entercom Communications,724972922289,AWS Backup,475.079561556
+3,SEP,2022,Entercom Communications,724972922289,AWS Certificate Manager,1810.0
+4,SEP,2022,Entercom Communications,724972922289,AWS Certificate Manager,362.0
+5,SEP,2022,Entercom Communications,724972922289,AWS CloudTrail,1479.8514464925
+6,SEP,2022,Entercom Communications,724972922289,AWS CodeArtifact,2.3e-09
+7,SEP,2022,Entercom Communications,724972922289,AWS CodeCommit,0.0
+8,SEP,2022,Entercom Communications,724972922289,AWS CodePipeline,2.715
+9,SEP,2022,Entercom Communications,724972922289,AWS Config,4662.2780925
+10,SEP,2022,Entercom Communications,724972922289,AWS Cost Explorer,0.5611
+11,SEP,2022,Entercom Communications,724972922289,AWS Data Exchange,0.089349912
+12,SEP,2022,Entercom Communications,724972922289,AWS Data Transfer,-18900.01
+13,SEP,2022,Entercom Communications,724972922289,AWS Database Migration Service,180.3566306471
+14,SEP,2022,Entercom Communications,724972922289,AWS Directory Service,521.6257463263
+15,SEP,2022,Entercom Communications,724972922289,AWS Elemental MediaLive,26.064
+16,SEP,2022,Entercom Communications,724972922289,AWS Elemental MediaStore,0.000173736
+17,SEP,2022,Entercom Communications,724972922289,AWS Global Accelerator,0.0
+18,SEP,2022,Entercom Communications,724972922289,AWS Global Accelerator,81.4528198824
+19,SEP,2022,Entercom Communications,724972922289,AWS Glue,1215.808090189
+20,SEP,2022,Entercom Communications,724972922289,AWS Key Management Service,64.3600530798
+21,SEP,2022,Entercom Communications,724972922289,AWS Key Management Service,1.802711109
+22,SEP,2022,Entercom Communications,724972922289,AWS Key Management Service,1.801673979
+23,SEP,2022,Entercom Communications,724972922289,AWS Key Management Service,0.903110601
+24,SEP,2022,Entercom Communications,724972922289,AWS Key Management Service,57.187825512
+25,SEP,2022,Entercom Communications,724972922289,AWS Key Management Service,33.8213393265
+26,SEP,2022,Entercom Communications,724972922289,AWS Key Management Service,1.365112317
+27,SEP,2022,Entercom Communications,724972922289,AWS Key Management Service,1.8854370585
+28,SEP,2022,Entercom Communications,724972922289,AWS Lambda,1068.2085870603
+29,SEP,2022,Entercom Communications,724972922289,AWS Lambda,7.636330986
+30,SEP,2022,Entercom Communications,724972922289,AWS Lambda,0.2480866379
+31,SEP,2022,Entercom Communications,724972922289,AWS Lambda,32.5181425966
+32,SEP,2022,Entercom Communications,724972922289,AWS Lambda,1.3196562174
+33,SEP,2022,Entercom Communications,724972922289,AWS Lambda,6.3879382246
+34,SEP,2022,Entercom Communications,724972922289,AWS Lambda,4.124430348
+35,SEP,2022,Entercom Communications,724972922289,AWS Lambda,0.0002088382
+36,SEP,2022,Entercom Communications,724972922289,AWS Lambda,7.4994624535
+37,SEP,2022,Entercom Communications,724972922289,AWS Premium Support,41681.07
+38,SEP,2022,Entercom Communications,724972922289,AWS Secrets Manager,68.4112146784
+39,SEP,2022,Entercom Communications,724972922289,AWS Security Hub,656.983121
+40,SEP,2022,Entercom Communications,724972922289,AWS Service Catalog,0.4922295
+41,SEP,2022,Entercom Communications,724972922289,AWS Step Functions,0.0671223631
+42,SEP,2022,Entercom Communications,724972922289,AWS Systems Manager,0.136836
+43,SEP,2022,Entercom Communications,724972922289,AWS Transfer Family,202.8183834449
+44,SEP,2022,Entercom Communications,724972922289,AWS WAF,96.9738551666
+45,SEP,2022,Entercom Communications,724972922289,AWS X-Ray,58.2391315075
+46,SEP,2022,Entercom Communications,724972922289,Amazon API Gateway,97.1393300021
+47,SEP,2022,Entercom Communications,724972922289,Amazon API Gateway,5.13652e-05
+48,SEP,2022,Entercom Communications,724972922289,Amazon CloudFront,23696.5513527375
+49,SEP,2022,Entercom Communications,724972922289,Amazon CloudFront,0.0365087373
+50,SEP,2022,Entercom Communications,724972922289,Amazon CloudFront,14.1972789013
+51,SEP,2022,Entercom Communications,724972922289,Amazon CloudFront,0.2007509709
+52,SEP,2022,Entercom Communications,724972922289,Amazon CloudFront,3.707e-07
+53,SEP,2022,Entercom Communications,724972922289,Amazon Cognito,8.538675
+54,SEP,2022,Entercom Communications,724972922289,Amazon Detective,665.6363339851
+55,SEP,2022,Entercom Communications,724972922289,Amazon DynamoDB,5764.4347622778
+56,SEP,2022,Entercom Communications,724972922289,Amazon DynamoDB,2.9565445
+57,SEP,2022,Entercom Communications,724972922289,Amazon DynamoDB,22.1630370188
+58,SEP,2022,Entercom Communications,724972922289,Amazon DynamoDB,340.5795105951
+59,SEP,2022,Entercom Communications,724972922289,Amazon DynamoDB,89.1441988158
+60,SEP,2022,Entercom Communications,724972922289,Amazon DynamoDB,2.9565446056
+61,SEP,2022,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),121.6430003737
+62,SEP,2022,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),0.033130872
+63,SEP,2022,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),0.100757448
+64,SEP,2022,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),0.363539232
+65,SEP,2022,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),116.1025298254
+66,SEP,2022,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),92.7134320372
+67,SEP,2022,Entercom Communications,724972922289,Amazon ElastiCache,11795.62158036
+68,SEP,2022,Entercom Communications,724972922289,Amazon ElastiCache,891.3888
+69,SEP,2022,Entercom Communications,724972922289,Amazon ElastiCache,1782.7776
+70,SEP,2022,Entercom Communications,724972922289,Amazon ElastiCache,6354.4032
+71,SEP,2022,Entercom Communications,724972922289,Amazon ElastiCache,406.5984
+72,SEP,2022,Entercom Communications,724972922289,Amazon ElastiCache,4258.8576
+73,SEP,2022,Entercom Communications,724972922289,Amazon ElastiCache,500.4288
+74,SEP,2022,Entercom Communications,724972922289,EC2 - Other,58225.5850552436
+75,SEP,2022,Entercom Communications,724972922289,EC2 - Other,0.7410923896
+76,SEP,2022,Entercom Communications,724972922289,EC2 - Other,0.002459635
+77,SEP,2022,Entercom Communications,724972922289,EC2 - Other,0.0020401758
+78,SEP,2022,Entercom Communications,724972922289,EC2 - Other,29.3220035092
+79,SEP,2022,Entercom Communications,724972922289,EC2 - Other,1088.2748170144
+80,SEP,2022,Entercom Communications,724972922289,EC2 - Other,0.7275529869
+81,SEP,2022,Entercom Communications,724972922289,EC2 - Other,98.6519896519
+82,SEP,2022,Entercom Communications,724972922289,EC2 - Other,18.3875384973
+83,SEP,2022,Entercom Communications,724972922289,EC2 - Other,87.9660121657
+84,SEP,2022,Entercom Communications,724972922289,EC2 - Other,538.0402033909
+85,SEP,2022,Entercom Communications,724972922289,EC2 - Other,119.7222688431
+86,SEP,2022,Entercom Communications,724972922289,EC2 - Other,6622.3391200893
+87,SEP,2022,Entercom Communications,724972922289,EC2 - Other,13.03200036
+88,SEP,2022,Entercom Communications,724972922289,EC2 - Other,907.0426807332
+89,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,127445.2039712421
+90,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,0.0
+91,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,0.0065474702
+92,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,2.2101e-06
+93,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,328.6055264086
+94,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,0.0188440038
+95,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,250.2144
+96,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,7.9356e-06
+97,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,125.1799305488
+98,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,1376.102818
+99,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,706.8914271374
+100,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,2871.5807716028
+101,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Container Service,2314.235270261
+102,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Container Service for Kubernetes,799.012049563
+103,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Container Service for Kubernetes,65.16
+104,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Container Service for Kubernetes,17.1381227609
+105,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Container Service for Kubernetes,195.48
+106,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Container Service for Kubernetes,847.08
+107,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Container Service for Kubernetes,651.6
+108,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Container Service for Kubernetes,34.0245978534
+109,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Container Service for Kubernetes,130.32
+110,SEP,2022,Entercom Communications,724972922289,Amazon Elastic File System,1616.8290688792
+111,SEP,2022,Entercom Communications,724972922289,Amazon Elastic File System,4.121817984
+112,SEP,2022,Entercom Communications,724972922289,Amazon Elastic File System,54.6318294517
+113,SEP,2022,Entercom Communications,724972922289,Amazon Elastic File System,330.669759888
+114,SEP,2022,Entercom Communications,724972922289,Amazon Elastic File System,10.575409392
+115,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Load Balancing,10050.9670419413
+116,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Load Balancing,14.6615380471
+117,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Load Balancing,14.661
+118,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Load Balancing,18.217134316
+119,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Load Balancing,130.5096532132
+120,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Load Balancing,44.1284859038
+121,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Load Balancing,98.2285897008
+122,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Load Balancing,393.1377783998
+123,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Load Balancing,14.6715759425
+124,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Load Balancing,16.4221179465
+125,SEP,2022,Entercom Communications,724972922289,Amazon Elastic Load Balancing,131.587165663
+126,SEP,2022,Entercom Communications,724972922289,Amazon Glacier,2.3356078592
+127,SEP,2022,Entercom Communications,724972922289,Amazon GuardDuty,3520.3467825786
+128,SEP,2022,Entercom Communications,724972922289,Amazon Inspector,48.77045
+129,SEP,2022,Entercom Communications,724972922289,Amazon Kinesis,126.4744791709
+130,SEP,2022,Entercom Communications,724972922289,Amazon Kinesis Firehose,16.5098591942
+131,SEP,2022,Entercom Communications,724972922289,Amazon MQ,676.7640281507
+132,SEP,2022,Entercom Communications,724972922289,Amazon Macie,1.339038
+133,SEP,2022,Entercom Communications,724972922289,Amazon Managed Grafana,8.145
+134,SEP,2022,Entercom Communications,724972922289,Amazon Managed Streaming for Apache Kafka,1108.9679727743
+135,SEP,2022,Entercom Communications,724972922289,Amazon Managed Streaming for Apache Kafka,180.4631879284
+136,SEP,2022,Entercom Communications,724972922289,Amazon Managed Workflows for Apache Airflow,1599.1912123694
+137,SEP,2022,Entercom Communications,724972922289,Amazon Neptune,4.3747340877
+138,SEP,2022,Entercom Communications,724972922289,Amazon OpenSearch Service,4931.194367276
+139,SEP,2022,Entercom Communications,724972922289,Amazon OpenSearch Service,49.3009317449
+140,SEP,2022,Entercom Communications,724972922289,Amazon OpenSearch Service,7029.7542700429
+141,SEP,2022,Entercom Communications,724972922289,Amazon OpenSearch Service,9708.4346015056
+142,SEP,2022,Entercom Communications,724972922289,Amazon OpenSearch Service,18699.634687929
+143,SEP,2022,Entercom Communications,724972922289,Amazon OpenSearch Service,219.4643281833
+144,SEP,2022,Entercom Communications,724972922289,Amazon Personalize,1996.6706101234
+145,SEP,2022,Entercom Communications,724972922289,Amazon Pinpoint,2.715000048
+146,SEP,2022,Entercom Communications,724972922289,Amazon QuickSight,32.580000288
+147,SEP,2022,Entercom Communications,724972922289,Amazon Redshift,1861.3033109906
+148,SEP,2022,Entercom Communications,724972922289,Amazon Relational Database Service,131482.5594193741
+149,SEP,2022,Entercom Communications,724972922289,Amazon Relational Database Service,0.0043974056
+150,SEP,2022,Entercom Communications,724972922289,Amazon Relational Database Service,3.7630883756
+151,SEP,2022,Entercom Communications,724972922289,Amazon Relational Database Service,588.4872684083
+152,SEP,2022,Entercom Communications,724972922289,Amazon Relational Database Service,1712.1049773171
+153,SEP,2022,Entercom Communications,724972922289,Amazon Relational Database Service,2103.488150208
+154,SEP,2022,Entercom Communications,724972922289,Amazon Relational Database Service,5875.4527439727
+155,SEP,2022,Entercom Communications,724972922289,Amazon Relational Database Service,14.0092332381
+156,SEP,2022,Entercom Communications,724972922289,Amazon Relational Database Service,1670.9992636179
+157,SEP,2022,Entercom Communications,724972922289,Amazon Route 53,1328.6623130733
+158,SEP,2022,Entercom Communications,724972922289,Amazon Route 53,0.136812832
+159,SEP,2022,Entercom Communications,724972922289,Amazon Route 53,0.0905
+160,SEP,2022,Entercom Communications,724972922289,Amazon Route 53,0.0905
+161,SEP,2022,Entercom Communications,724972922289,Amazon Route 53,1.782061564
+162,SEP,2022,Entercom Communications,724972922289,Amazon Route 53,0.905400734
+163,SEP,2022,Entercom Communications,724972922289,Amazon Route 53,5.163375597
+164,SEP,2022,Entercom Communications,724972922289,Amazon Route 53,11.14621168
+165,SEP,2022,Entercom Communications,724972922289,Amazon Route 53,0.543205616
+166,SEP,2022,Entercom Communications,724972922289,Amazon Route 53,0.090518824
+167,SEP,2022,Entercom Communications,724972922289,Amazon Route 53,0.0905
+168,SEP,2022,Entercom Communications,724972922289,Amazon SageMaker,610.0121007087
+169,SEP,2022,Entercom Communications,724972922289,Amazon Simple Email Service,12.7167565742
+170,SEP,2022,Entercom Communications,724972922289,Amazon Simple Notification Service,11.6690756043
+171,SEP,2022,Entercom Communications,724972922289,Amazon Simple Notification Service,0.0059881808
+172,SEP,2022,Entercom Communications,724972922289,Amazon Simple Notification Service,0.0001136368
+173,SEP,2022,Entercom Communications,724972922289,Amazon Simple Notification Service,5.7015e-05
+174,SEP,2022,Entercom Communications,724972922289,Amazon Simple Notification Service,5.90064e-05
+175,SEP,2022,Entercom Communications,724972922289,Amazon Simple Queue Service,25.7322473662
+176,SEP,2022,Entercom Communications,724972922289,Amazon Simple Queue Service,0.000118012
+177,SEP,2022,Entercom Communications,724972922289,Amazon Simple Queue Service,6.1902e-05
+178,SEP,2022,Entercom Communications,724972922289,Amazon Simple Queue Service,6.154e-05
+179,SEP,2022,Entercom Communications,724972922289,Amazon Simple Storage Service,32527.7862602867
+180,SEP,2022,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0698997263
+181,SEP,2022,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0004480712
+182,SEP,2022,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0810159089
+183,SEP,2022,Entercom Communications,724972922289,Amazon Simple Storage Service,5.2691397122
+184,SEP,2022,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0036170581
+185,SEP,2022,Entercom Communications,724972922289,Amazon Simple Storage Service,219.4437540136
+186,SEP,2022,Entercom Communications,724972922289,Amazon Simple Storage Service,39.8634122904
+187,SEP,2022,Entercom Communications,724972922289,Amazon Simple Storage Service,423.128604693
+188,SEP,2022,Entercom Communications,724972922289,Amazon Simple Storage Service,4.4879936394
+189,SEP,2022,Entercom Communications,724972922289,Amazon Simple Storage Service,1380.1648046616
+190,SEP,2022,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0004209233
+191,SEP,2022,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0005272977
+192,SEP,2022,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0114115458
+193,SEP,2022,Entercom Communications,724972922289,Amazon Simple Workflow Service,2.273e-06
+194,SEP,2022,Entercom Communications,724972922289,Amazon SimpleDB,2.41134e-05
+195,SEP,2022,Entercom Communications,724972922289,Amazon Virtual Private Cloud,8303.1629918523
+196,SEP,2022,Entercom Communications,724972922289,Amazon Virtual Private Cloud,19.548
+197,SEP,2022,Entercom Communications,724972922289,Amazon Virtual Private Cloud,65.16
+198,SEP,2022,Entercom Communications,724972922289,Amazon WorkSpaces,469.4506499366
+199,SEP,2022,Entercom Communications,724972922289,AmazonCloudWatch,11290.9322606536
+200,SEP,2022,Entercom Communications,724972922289,AmazonCloudWatch,19.8763155338
+201,SEP,2022,Entercom Communications,724972922289,AmazonCloudWatch,4.9314858345
+202,SEP,2022,Entercom Communications,724972922289,AmazonCloudWatch,245.4920691338
+203,SEP,2022,Entercom Communications,724972922289,AmazonCloudWatch,2.172000024
+204,SEP,2022,Entercom Communications,724972922289,AmazonCloudWatch,757.2915254712
+205,SEP,2022,Entercom Communications,724972922289,AmazonCloudWatch,4.344000048
+206,SEP,2022,Entercom Communications,724972922289,AmazonCloudWatch,866.0795694416
+207,SEP,2022,Entercom Communications,724972922289,AmazonCloudWatch,11.1964730224
+208,SEP,2022,Entercom Communications,724972922289,AmazonCloudWatch,32.1037397467
+209,SEP,2022,Entercom Communications,724972922289,AmazonWorkMail,181.000000152
+210,SEP,2022,Entercom Communications,724972922289,Apache Kafka® on Confluent Cloud™ - Annual Commits,0.0
+211,SEP,2022,Entercom Communications,724972922289,Aviatrix Secure Networking Platform Metered - 24x7 Support with Copilot,60.345
+212,SEP,2022,Entercom Communications,724972922289,CloudWatch Events,6.896824905
+213,SEP,2022,Entercom Communications,724972922289,CodeBuild,1.02265
+214,SEP,2022,Entercom Communications,724972922289,Datadog Pro,235159.9
+215,SEP,2022,Entercom Communications,724972922289,Palo Alto Networks VM-300 Bundle 2,993.6
+216,SEP,2022,Entercom Communications,724972922289,SFTP Gateway,43.2
+217,SEP,2022,Entercom Communications,724972922289,Savings Plans for AWS Compute usage,29322.0
+218,SEP,2022,Entercom Communications,724972922289,Tax,19512.93
+219,SEP,2022,Entercom Communications,724972922289,Training Certification Vouchers - backup,2400.0
+220,SEP,2022,Entercom Communications,724972922289,Training Certification Vouchers - backup2,150.0
+221,SEP,2022,Entercom Communications,724972922289,Training and Certification Vouchers,200.0
