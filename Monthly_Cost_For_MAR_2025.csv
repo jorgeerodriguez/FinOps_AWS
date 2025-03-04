@@ -1,0 +1,176 @@
+,Month,Year,Name,Account,Service,Cost,Enviroment
+0,MAR,2025,Entercom Communications,724972922289,AWS Amplify,0.000733608,Environment$
+1,MAR,2025,Entercom Communications,724972922289,AWS Backup,0.0980709254,Environment$
+2,MAR,2025,Entercom Communications,724972922289,AWS Backup,11.458448422,Environment$prod
+3,MAR,2025,Entercom Communications,724972922289,AWS Budgets,0.0364,Environment$
+4,MAR,2025,Entercom Communications,724972922289,AWS Certificate Manager,1456.0,Environment$
+5,MAR,2025,Entercom Communications,724972922289,AWS CloudTrail,221.0665042311,Environment$
+6,MAR,2025,Entercom Communications,724972922289,AWS Config,148.0934,Environment$
+7,MAR,2025,Entercom Communications,724972922289,AWS Cost Explorer,2.1294,Environment$
+8,MAR,2025,Entercom Communications,724972922289,AWS DataSync,0.8802115329,Environment$
+9,MAR,2025,Entercom Communications,724972922289,AWS Database Migration Service,183.1722365605,Environment$
+10,MAR,2025,Entercom Communications,724972922289,AWS Database Migration Service,22.795568499,Environment$nonprod
+11,MAR,2025,Entercom Communications,724972922289,AWS Directory Service,36.5438170272,Environment$
+12,MAR,2025,Entercom Communications,724972922289,AWS Elemental MediaLive,2.002,Environment$
+13,MAR,2025,Entercom Communications,724972922289,AWS Elemental MediaStore,1.22096e-05,Environment$
+14,MAR,2025,Entercom Communications,724972922289,AWS End User Messaging,0.201814514,Environment$
+15,MAR,2025,Entercom Communications,724972922289,AWS Global Accelerator,0.0,Environment$
+16,MAR,2025,Entercom Communications,724972922289,AWS Global Accelerator,2.5027588691,Environment$nonprod
+17,MAR,2025,Entercom Communications,724972922289,AWS Glue,0.1844730888,Environment$
+18,MAR,2025,Entercom Communications,724972922289,AWS Key Management Service,13.4524668419,Environment$
+19,MAR,2025,Entercom Communications,724972922289,AWS Key Management Service,0.1321539498,Environment$Production
+20,MAR,2025,Entercom Communications,724972922289,AWS Key Management Service,0.0661166382,Environment$dev
+21,MAR,2025,Entercom Communications,724972922289,AWS Key Management Service,0.0673779765,Environment$loadtest
+22,MAR,2025,Entercom Communications,724972922289,AWS Key Management Service,5.5276539087,Environment$nonprod
+23,MAR,2025,Entercom Communications,724972922289,AWS Key Management Service,4.2906248091,Environment$prod
+24,MAR,2025,Entercom Communications,724972922289,AWS Key Management Service,0.0660483882,Environment$sandbox
+25,MAR,2025,Entercom Communications,724972922289,AWS Key Management Service,0.1320967764,Environment$shared
+26,MAR,2025,Entercom Communications,724972922289,AWS Key Management Service,0.1323179064,Environment$stg
+27,MAR,2025,Entercom Communications,724972922289,AWS Lambda,104.8533511499,Environment$
+28,MAR,2025,Entercom Communications,724972922289,AWS Lambda,1.3252034417,Environment$Production
+29,MAR,2025,Entercom Communications,724972922289,AWS Lambda,0.2328984407,Environment$dev
+30,MAR,2025,Entercom Communications,724972922289,AWS Lambda,0.1577170139,Environment$nonprod
+31,MAR,2025,Entercom Communications,724972922289,AWS Lambda,0.4061359055,Environment$prd
+32,MAR,2025,Entercom Communications,724972922289,AWS Lambda,1.0677602318,Environment$prod
+33,MAR,2025,Entercom Communications,724972922289,AWS Lambda,0.0508945148,Environment$stg
+34,MAR,2025,Entercom Communications,724972922289,AWS Secrets Manager,10.0322759408,Environment$
+35,MAR,2025,Entercom Communications,724972922289,AWS Secrets Manager,2.9835078,Environment$nonprod
+36,MAR,2025,Entercom Communications,724972922289,AWS Secrets Manager,2.7783847,Environment$prod
+37,MAR,2025,Entercom Communications,724972922289,AWS Security Hub,23.30692,Environment$
+38,MAR,2025,Entercom Communications,724972922289,AWS Step Functions,0.0001789178,Environment$
+39,MAR,2025,Entercom Communications,724972922289,AWS Support (Enterprise),13650.0,Environment$
+40,MAR,2025,Entercom Communications,724972922289,AWS Systems Manager,0.0105105,Environment$
+41,MAR,2025,Entercom Communications,724972922289,AWS Transfer Family,15.0591170879,Environment$
+42,MAR,2025,Entercom Communications,724972922289,AWS WAF,7.8537898356,Environment$
+43,MAR,2025,Entercom Communications,724972922289,AWS WAF,0.821378775,Environment$nonprod
+44,MAR,2025,Entercom Communications,724972922289,AWS WAF,51.108165507,Environment$prod
+45,MAR,2025,Entercom Communications,724972922289,AWS X-Ray,2.29894665,Environment$
+46,MAR,2025,Entercom Communications,724972922289,Amazon API Gateway,5.7769830897,Environment$
+47,MAR,2025,Entercom Communications,724972922289,Amazon Athena,0.5223673,Environment$
+48,MAR,2025,Entercom Communications,724972922289,Amazon CloudFront,710.3274292351,Environment$
+49,MAR,2025,Entercom Communications,724972922289,Amazon CloudFront,0.150842429,Environment$nonprod
+50,MAR,2025,Entercom Communications,724972922289,Amazon CloudFront,0.1559308879,Environment$prd
+51,MAR,2025,Entercom Communications,724972922289,Amazon CloudFront,269.9963410672,Environment$prod
+52,MAR,2025,Entercom Communications,724972922289,Amazon CloudFront,1.141e-07,Environment$stg
+53,MAR,2025,Entercom Communications,724972922289,Amazon Cognito,15.56555,Environment$
+54,MAR,2025,Entercom Communications,724972922289,Amazon Detective,9.2379632438,Environment$
+55,MAR,2025,Entercom Communications,724972922289,Amazon DevOps Guru,0.0,Environment$
+56,MAR,2025,Entercom Communications,724972922289,Amazon DocumentDB (with MongoDB compatibility),0.0105504999,Environment$
+57,MAR,2025,Entercom Communications,724972922289,Amazon DocumentDB (with MongoDB compatibility),24.6249580359,Environment$nonprod
+58,MAR,2025,Entercom Communications,724972922289,Amazon DocumentDB (with MongoDB compatibility),19.8403232965,Environment$prod
+59,MAR,2025,Entercom Communications,724972922289,Amazon DynamoDB,0.008630713,Environment$
+60,MAR,2025,Entercom Communications,724972922289,Amazon DynamoDB,0.9196871958,Environment$nonprod
+61,MAR,2025,Entercom Communications,724972922289,Amazon DynamoDB,6.897053862,Environment$prod
+62,MAR,2025,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),11.4883836485,Environment$
+63,MAR,2025,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),0.002462724,Environment$common
+64,MAR,2025,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),0.0074896195,Environment$global
+65,MAR,2025,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),0.0270445285,Environment$nonprod
+66,MAR,2025,Entercom Communications,724972922289,Amazon EC2 Container Registry (ECR),55.473849277,Environment$prod
+67,MAR,2025,Entercom Communications,724972922289,Amazon ElastiCache,3909.442409557,Environment$
+68,MAR,2025,Entercom Communications,724972922289,Amazon ElastiCache,458.5399,Environment$nonprod
+69,MAR,2025,Entercom Communications,724972922289,Amazon ElastiCache,361.14624,Environment$prod
+70,MAR,2025,Entercom Communications,724972922289,EC2 - Other,1944.7176441798,Environment$
+71,MAR,2025,Entercom Communications,724972922289,EC2 - Other,0.0469677408,Environment$PSFalcon
+72,MAR,2025,Entercom Communications,724972922289,EC2 - Other,0.0815493545,Environment$dev
+73,MAR,2025,Entercom Communications,724972922289,EC2 - Other,1.1741935488,Environment$management
+74,MAR,2025,Entercom Communications,724972922289,EC2 - Other,99.2576587848,Environment$nonprod
+75,MAR,2025,Entercom Communications,724972922289,EC2 - Other,0.6028407284,Environment$prd
+76,MAR,2025,Entercom Communications,724972922289,EC2 - Other,423.1940005737,Environment$prod
+77,MAR,2025,Entercom Communications,724972922289,EC2 - Other,6.788442341,Environment$stg
+78,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,1782.8750289954,Environment$
+79,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,4.245696,Environment$dev
+80,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,569.4565021329,Environment$nonprod
+81,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,6.840288,Environment$prd
+82,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,4596.0203044544,Environment$prod
+83,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Compute Cloud - Compute,4.2260410254,Environment$stg
+84,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Container Service,619.4729096024,Environment$
+85,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Container Service for Kubernetes,68.3201314107,Environment$
+86,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Container Service for Kubernetes,45.045,Environment$nonprod
+87,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Container Service for Kubernetes,45.045,Environment$prod
+88,MAR,2025,Entercom Communications,724972922289,Amazon Elastic File System,13.7493395872,Environment$
+89,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Load Balancing,494.994784906,Environment$
+90,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Load Balancing,1.1261356389,Environment$Production
+91,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Load Balancing,1.1317689184,Environment$dev
+92,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Load Balancing,20.107772335,Environment$nonprod
+93,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Load Balancing,3.3795696874,Environment$prd
+94,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Load Balancing,153.84727815,Environment$prod
+95,MAR,2025,Entercom Communications,724972922289,Amazon Elastic Load Balancing,1.1309875249,Environment$stg
+96,MAR,2025,Entercom Communications,724972922289,Amazon Glacier,0.1515165654,Environment$
+97,MAR,2025,Entercom Communications,724972922289,Amazon GuardDuty,354.8341804816,Environment$
+98,MAR,2025,Entercom Communications,724972922289,Amazon Kinesis,8.9273561123,Environment$
+99,MAR,2025,Entercom Communications,724972922289,Amazon Lightsail,0.6869659406,Environment$
+100,MAR,2025,Entercom Communications,724972922289,Amazon Location Service,8.19e-05,Environment$
+101,MAR,2025,Entercom Communications,724972922289,Amazon MQ,4.4948610899,Environment$
+102,MAR,2025,Entercom Communications,724972922289,Amazon MQ,15.8240707639,Environment$nonprod
+103,MAR,2025,Entercom Communications,724972922289,Amazon MQ,15.7564785574,Environment$prod
+104,MAR,2025,Entercom Communications,724972922289,Amazon Macie,0.149604,Environment$
+105,MAR,2025,Entercom Communications,724972922289,Amazon Managed Grafana,8.19,Environment$
+106,MAR,2025,Entercom Communications,724972922289,Amazon Managed Grafana,8.19,Environment$nonprod
+107,MAR,2025,Entercom Communications,724972922289,Amazon Managed Streaming for Apache Kafka,5.2372900042,Environment$
+108,MAR,2025,Entercom Communications,724972922289,Amazon Managed Streaming for Apache Kafka,13.855131609,Environment$nonprod
+109,MAR,2025,Entercom Communications,724972922289,Amazon Managed Workflows for Apache Airflow,616.616,Environment$
+110,MAR,2025,Entercom Communications,724972922289,Amazon Managed Workflows for Apache Airflow,198.198,Environment$nonprod
+111,MAR,2025,Entercom Communications,724972922289,Amazon Managed Workflows for Apache Airflow,198.198,Environment$prod
+112,MAR,2025,Entercom Communications,724972922289,Amazon Neptune,0.2778967877,Environment$
+113,MAR,2025,Entercom Communications,724972922289,Amazon OpenSearch Service,80.2382045778,Environment$
+114,MAR,2025,Entercom Communications,724972922289,Amazon OpenSearch Service,824.5365767909,Environment$nonprod
+115,MAR,2025,Entercom Communications,724972922289,Amazon OpenSearch Service,2208.3531605267,Environment$prod
+116,MAR,2025,Entercom Communications,724972922289,Amazon OpenSearch Service,8.3984241885,Environment$stg
+117,MAR,2025,Entercom Communications,724972922289,Amazon Personalize,90.0924705783,Environment$
+118,MAR,2025,Entercom Communications,724972922289,Amazon QuickSight,4.299940579,Environment$
+119,MAR,2025,Entercom Communications,724972922289,Amazon Redshift,28.1662449537,Environment$
+120,MAR,2025,Entercom Communications,724972922289,Amazon Relational Database Service,13328.4435884469,Environment$
+121,MAR,2025,Entercom Communications,724972922289,Amazon Relational Database Service,0.0001038016,Environment$loadtest
+122,MAR,2025,Entercom Communications,724972922289,Amazon Relational Database Service,282.129836761,Environment$nonprod
+123,MAR,2025,Entercom Communications,724972922289,Amazon Relational Database Service,954.6231298117,Environment$prod
+124,MAR,2025,Entercom Communications,724972922289,Amazon Route 53,206.3270536365,Environment$
+125,MAR,2025,Entercom Communications,724972922289,Amazon Route 53,0.10104458,Environment$Dev
+126,MAR,2025,Entercom Communications,724972922289,Amazon Route 53,0.091,Environment$Production
+127,MAR,2025,Entercom Communications,724972922289,Amazon Route 53,0.091,Environment$common
+128,MAR,2025,Entercom Communications,724972922289,Amazon Route 53,0.455,Environment$global
+129,MAR,2025,Entercom Communications,724972922289,Amazon Route 53,0.09102366,Environment$loadtest
+130,MAR,2025,Entercom Communications,724972922289,Amazon Route 53,4.440533552,Environment$nonprod
+131,MAR,2025,Entercom Communications,724972922289,Amazon Route 53,2.40111326,Environment$prod
+132,MAR,2025,Entercom Communications,724972922289,Amazon Route 53,0.091017836,Environment$sandbox
+133,MAR,2025,Entercom Communications,724972922289,Amazon Route 53,0.091004368,Environment$stg
+134,MAR,2025,Entercom Communications,724972922289,Amazon Route 53,0.091,Environment$test
+135,MAR,2025,Entercom Communications,724972922289,Amazon SageMaker,307.2953349085,Environment$
+136,MAR,2025,Entercom Communications,724972922289,Amazon Simple Email Service,0.8287508401,Environment$
+137,MAR,2025,Entercom Communications,724972922289,Amazon Simple Notification Service,0.8644049343,Environment$
+138,MAR,2025,Entercom Communications,724972922289,Amazon Simple Notification Service,1.4657e-05,Environment$Common
+139,MAR,2025,Entercom Communications,724972922289,Amazon Simple Notification Service,2.73e-06,Environment$Production
+140,MAR,2025,Entercom Communications,724972922289,Amazon Simple Notification Service,4.368e-05,Environment$Sandbox
+141,MAR,2025,Entercom Communications,724972922289,Amazon Simple Notification Service,3.64e-06,Environment$prod
+142,MAR,2025,Entercom Communications,724972922289,Amazon Simple Queue Service,1.9622152808,Environment$
+143,MAR,2025,Entercom Communications,724972922289,Amazon Simple Queue Service,5.096e-06,Environment$dev
+144,MAR,2025,Entercom Communications,724972922289,Amazon Simple Queue Service,0.064992966,Environment$nonprod
+145,MAR,2025,Entercom Communications,724972922289,Amazon Simple Queue Service,0.0938221956,Environment$prod
+146,MAR,2025,Entercom Communications,724972922289,Amazon Simple Storage Service,2373.2298518776,Environment$
+147,MAR,2025,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0047291087,Environment$Common
+148,MAR,2025,Entercom Communications,724972922289,Amazon Simple Storage Service,6.07763e-05,Environment$Dev
+149,MAR,2025,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0051737695,Environment$POC
+150,MAR,2025,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0024570832,Environment$Production
+151,MAR,2025,Entercom Communications,724972922289,Amazon Simple Storage Service,6.74258e-05,Environment$Sandbox
+152,MAR,2025,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0001859363,Environment$common
+153,MAR,2025,Entercom Communications,724972922289,Amazon Simple Storage Service,1.4072559182,Environment$dev
+154,MAR,2025,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0046270377,Environment$loadtest
+155,MAR,2025,Entercom Communications,724972922289,Amazon Simple Storage Service,107.0157431683,Environment$nonprod
+156,MAR,2025,Entercom Communications,724972922289,Amazon Simple Storage Service,0.2374201709,Environment$prd
+157,MAR,2025,Entercom Communications,724972922289,Amazon Simple Storage Service,1137.405769717,Environment$prod
+158,MAR,2025,Entercom Communications,724972922289,Amazon Simple Storage Service,6.26678e-05,Environment$qa
+159,MAR,2025,Entercom Communications,724972922289,Amazon Simple Storage Service,0.0002272991,Environment$stg
+160,MAR,2025,Entercom Communications,724972922289,Amazon Simple Workflow Service,8.71e-08,Environment$
+161,MAR,2025,Entercom Communications,724972922289,Amazon SimpleDB,1.0349e-06,Environment$
+162,MAR,2025,Entercom Communications,724972922289,Amazon Virtual Private Cloud,698.550931067,Environment$
+163,MAR,2025,Entercom Communications,724972922289,Amazon Virtual Private Cloud,7.4165,Environment$nonprod
+164,MAR,2025,Entercom Communications,724972922289,Amazon Virtual Private Cloud,0.2366,Environment$prd
+165,MAR,2025,Entercom Communications,724972922289,Amazon Virtual Private Cloud,10.3740079244,Environment$prod
+166,MAR,2025,Entercom Communications,724972922289,Amazon Virtual Private Cloud,6.8461300136,Environment$shared
+167,MAR,2025,Entercom Communications,724972922289,Amazon WorkSpaces,216.2887999382,Environment$
+168,MAR,2025,Entercom Communications,724972922289,AmazonCloudWatch,728.0173403868,Environment$
+169,MAR,2025,Entercom Communications,724972922289,AmazonCloudWatch,66.173932328,Environment$nonprod
+170,MAR,2025,Entercom Communications,724972922289,AmazonCloudWatch,210.5643900976,Environment$prod
+171,MAR,2025,Entercom Communications,724972922289,AmazonWorkMail,13.185215043,Environment$
+172,MAR,2025,Entercom Communications,724972922289,CloudWatch Events,0.1513264296,Environment$
+173,MAR,2025,Entercom Communications,724972922289,Savings Plans for AWS Compute usage,27081.6,Environment$
+174,MAR,2025,Entercom Communications,724972922289,Tax,702.15,Environment$
