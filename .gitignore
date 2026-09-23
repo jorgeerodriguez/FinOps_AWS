@@ -4,3 +4,4 @@
 # Track .ipynb notebooks and this file
 !.gitignore
 !*.ipynb
+!requirements.txt

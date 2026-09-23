@@ -1,0 +1,15 @@
+# AWS SDK (Cost Explorer, Session)
+boto3
+
+# Data handling
+pandas
+numpy
+python-dateutil
+openpyxl          # pandas.DataFrame.to_excel
+
+# Charts
+plotly
+nbformat          # needed by plotly fig.show() inside notebooks
+
+# Jupyter kernel (VS Code / Jupyter)
+ipykernel
