@@ -12,5 +12,11 @@ plotly
 nbformat          # needed by plotly fig.show() inside notebooks
 matplotlib        # pandas df.plot() default backend
 
+# Forecasting / ML (FinOps_AWS_Forecasting.ipynb)
+scikit-learn      # imported as sklearn (the "sklearn" pip name is deprecated)
+statsmodels
+xgboost           # macOS also needs: brew install libomp
+prophet
+
 # Jupyter kernel (VS Code / Jupyter)
 ipykernel
