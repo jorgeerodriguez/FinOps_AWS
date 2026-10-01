@@ -5,3 +5,4 @@
 !.gitignore
 !*.ipynb
 !requirements.txt
+!*.py

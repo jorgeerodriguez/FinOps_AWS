@@ -11,6 +11,7 @@ openpyxl          # pandas.DataFrame.to_excel
 plotly
 nbformat          # needed by plotly fig.show() inside notebooks
 matplotlib        # pandas df.plot() default backend
+seaborn           # FinOps.ipynb charts
 
 # Forecasting / ML (FinOps_AWS_Forecasting.ipynb)
 scikit-learn      # imported as sklearn (the "sklearn" pip name is deprecated)
