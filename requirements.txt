@@ -21,3 +21,7 @@ prophet
 
 # Jupyter kernel (VS Code / Jupyter)
 ipykernel
+
+# GCP billing export (multicloud_kpis.py)
+google-cloud-bigquery
+db-dtypes

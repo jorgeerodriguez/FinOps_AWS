@@ -106,13 +106,41 @@ ENV_NORMALIZATION = {
     'sandbox': 'sandbox', 'poc': 'sandbox', 'demo': 'sandbox', '': 'untagged',
 }
 
-# Palette (validated default, fixed order) + chrome tokens
-C_AWS, C_MKT, C_TAX = '#2a78d6', '#eb6834', '#898781'
-SERIES = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948']
-C_OTHER = '#c3c2b7'
-INK, INK2, MUTED, GRID, AXIS = '#0b0b0b', '#52514e', '#898781', '#e1e0d9', '#c3c2b7'
-GOOD, WARN, BAD = '#0ca30c', '#fab219', '#d03b3b'
-SEQ_BLUE = [[0, '#f4f8fe'], [0.15, '#cde2fb'], [0.4, '#86b6ef'], [0.7, '#2a78d6'], [1, '#0d366b']]
+# Palette (validated default, fixed order) + chrome tokens, per theme.
+# Dark steps are the palette's own dark-surface steps, not an inversion of light.
+THEMES = {
+    'dark': dict(
+        series=['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767'],
+        other='#52514e', tax='#6b6a66', ink='#ffffff', ink2='#c3c2b7', muted='#898781', grid='#2c2c2a',
+        axis='#383835', good='#0ca30c', good_text='#0ca30c', warn='#fab219', bad='#d03b3b', bad_text='#e66767',
+        under_budget='#256abf', hover_bg='#262624', page='#0d0d0d', surface='#1a1a19',
+        border='rgba(255,255,255,.10)', warn_text='#fab219',
+        seq=[[0, '#1f2633'], [0.15, '#184f95'], [0.4, '#256abf'], [0.7, '#3987e5'], [1, '#b7d3f6']]),
+    'light': dict(
+        series=['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'],
+        other='#c3c2b7', tax='#898781', ink='#0b0b0b', ink2='#52514e', muted='#898781', grid='#e1e0d9',
+        axis='#c3c2b7', good='#0ca30c', good_text='#006300', warn='#fab219', bad='#d03b3b', bad_text='#d03b3b',
+        under_budget='#86b6ef', hover_bg='#ffffff', page='#f9f9f7', surface='#fcfcfb',
+        border='rgba(11,11,11,.10)', warn_text='#b07800',
+        seq=[[0, '#f4f8fe'], [0.15, '#cde2fb'], [0.4, '#86b6ef'], [0.7, '#2a78d6'], [1, '#0d366b']]),
+}
+THEME = 'dark'
+T = dict(THEMES[THEME])
+
+
+def set_theme(name: str = 'dark') -> None:
+    """Switch report + chart colors ('dark' or 'light'). Charts read the module globals at call time."""
+    global THEME, C_AWS, C_MKT, C_TAX, SERIES, C_OTHER, INK, INK2, MUTED, GRID, AXIS, GOOD, WARN, BAD, SEQ_BLUE
+    THEME = name
+    T.clear()
+    T.update(THEMES[name])
+    SERIES = T['series']
+    C_AWS, C_MKT, C_TAX, C_OTHER = SERIES[0], SERIES[1], T['tax'], T['other']
+    INK, INK2, MUTED, GRID, AXIS = T['ink'], T['ink2'], T['muted'], T['grid'], T['axis']
+    GOOD, WARN, BAD, SEQ_BLUE = T['good'], T['warn'], T['bad'], T['seq']
+
+
+set_theme(THEME)
 
 
 # --------------------------------------------------------------------------------------
@@ -489,7 +517,7 @@ def _layout(fig: go.Figure, height: int = 380, yfmt: str = '$.2~s', legend: bool
     fig.update_layout(
         height=height, margin=dict(l=8, r=16, t=8, b=8), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         font=dict(family='system-ui, -apple-system, Segoe UI, sans-serif', size=12, color=INK2),
-        hoverlabel=dict(bgcolor='white', bordercolor=GRID, font=dict(color=INK)),
+        hoverlabel=dict(bgcolor=T['hover_bg'], bordercolor=GRID, font=dict(color=INK)),
         legend=dict(orientation='h', yanchor='bottom', y=1.02, x=0, title=None, traceorder='normal') if legend else None,
         showlegend=legend, bargap=0.25, hovermode='x unified',
     )
@@ -519,7 +547,7 @@ def chart_aws_trend(rd: ReportData) -> go.Figure:
     cat, m = rd.m['cat'], rd.m
     fig = go.Figure()
     fig.add_bar(x=cat.index, y=cat['Budgeted'], name='AWS Services (monthly)',
-                marker=dict(color=['#86b6ef' if v <= rd.budget else BAD for v in cat['Budgeted']], line=dict(width=0)),
+                marker=dict(color=[T['under_budget'] if v <= rd.budget else BAD for v in cat['Budgeted']], line=dict(width=0)),
                 hovertemplate='%{y:$,.0f}')
     fig.add_scatter(x=cat.index, y=m['rolling3'], name='3-month average', mode='lines',
                     line=dict(color=C_AWS, width=2), hovertemplate='%{y:$,.0f}')
@@ -612,7 +640,7 @@ def chart_tagging(rd: ReportData) -> go.Figure:
     fig = go.Figure(go.Scatter(x=up.index, y=up, mode='lines+markers', name='Untagged share',
                                line=dict(color=BAD, width=2), marker=dict(size=7), hovertemplate='%{y:.1%}<extra></extra>'))
     fig.add_hline(y=0.10, line=dict(color=GOOD, width=1.5),
-                  annotation=dict(text='Target ≤ 10%', font=dict(color='#006300', size=11)), annotation_position='top left')
+                  annotation=dict(text='Target ≤ 10%', font=dict(color=T['good_text'], size=11)), annotation_position='top left')
     fig = _layout(fig, 280, yfmt='.0%', legend=False)
     fig.update_yaxes(range=[0, 1])
     return fig
@@ -621,35 +649,41 @@ def chart_tagging(rd: ReportData) -> go.Figure:
 # --------------------------------------------------------------------------------------
 # HTML
 # --------------------------------------------------------------------------------------
-CSS = """
-:root{--page:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;--grid:#e1e0d9;
---border:rgba(11,11,11,.10);--good:#006300;--bad:#d03b3b;--warn:#b07800;--aws:#2a78d6;--mkt:#eb6834;--tax:#898781;color-scheme:light}
-*{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--ink);
-font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
-main{max-width:1180px;margin:0 auto;padding:32px 16px 64px}
-header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:24px}
-h1{font-size:28px;margin:0;letter-spacing:-.01em}h2{font-size:19px;margin:0 0 4px}h3{font-size:15px;margin:18px 0 6px}
-.sub{color:var(--ink2);margin:2px 0 0}.meta{color:var(--muted);font-size:12px;text-align:right}
-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin:16px 0}
-.lede{color:var(--ink2);margin:0 0 12px}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:16px 0}
-.tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
-.tile .k{color:var(--ink2);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
-.tile .v{font-size:28px;font-weight:650;margin:2px 0}.tile .d{font-size:12.5px;color:var(--ink2)}
-.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
-.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}
-.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
-ul.ins{margin:6px 0 0;padding-left:0;list-style:none}ul.ins li{padding:7px 0 7px 26px;position:relative;border-top:1px solid var(--grid)}
-ul.ins li:first-child{border-top:0}ul.ins li::before{position:absolute;left:2px;top:6px;font-weight:700}
-.w li::before{content:"✓";color:var(--good)}.x li::before{content:"!";color:var(--bad);left:7px}.a li::before{content:"→";color:var(--aws)}
-.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
-th,td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--grid);white-space:nowrap}
-th{color:var(--ink2);font-weight:600;font-size:12px}th:first-child,td:first-child{text-align:left;white-space:normal}
-tr.total td{font-weight:650;border-top:1px solid var(--muted)}
-details{margin-top:10px}summary{cursor:pointer;color:var(--ink2);font-size:13px}
-.note{color:var(--muted);font-size:12px;margin-top:8px}
-@media print{body{background:#fff}section,.tile{break-inside:avoid}}
+_CSS_TEMPLATE = """
+:root{{--page:{page};--surface:{surface};--ink:{ink};--ink2:{ink2};--muted:{muted};--grid:{grid};
+--border:{border};--good:{good_text};--bad:{bad_text};--warn:{warn_text};--aws:{s0};--mkt:{s1};--tax:{tax};color-scheme:{scheme}}}
+*{{box-sizing:border-box}}body{{margin:0;background:var(--page);color:var(--ink);
+font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}}
+main{{max-width:1180px;margin:0 auto;padding:32px 16px 64px}}
+header{{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:24px}}
+h1{{font-size:28px;margin:0;letter-spacing:-.01em}}h2{{font-size:19px;margin:0 0 4px}}h3{{font-size:15px;margin:18px 0 6px}}
+.sub{{color:var(--ink2);margin:2px 0 0}}.meta{{color:var(--muted);font-size:12px;text-align:right}}
+section{{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin:16px 0}}
+.lede{{color:var(--ink2);margin:0 0 12px}}
+.tiles{{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:16px 0}}
+.tile{{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}}
+.tile .k{{color:var(--ink2);font-size:12px;text-transform:uppercase;letter-spacing:.04em}}
+.tile .v{{font-size:28px;font-weight:650;margin:2px 0}}.tile .d{{font-size:12.5px;color:var(--ink2)}}
+.dot{{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}}
+.good{{color:var(--good)}}.bad{{color:var(--bad)}}.warn{{color:var(--warn)}}
+.cols{{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}}
+ul.ins{{margin:6px 0 0;padding-left:0;list-style:none}}ul.ins li{{padding:7px 0 7px 26px;position:relative;border-top:1px solid var(--grid)}}
+ul.ins li:first-child{{border-top:0}}ul.ins li::before{{position:absolute;left:2px;top:6px;font-weight:700}}
+.w li::before{{content:"✓";color:var(--good)}}.x li::before{{content:"!";color:var(--bad);left:7px}}.a li::before{{content:"→";color:var(--aws)}}
+.tbl{{overflow-x:auto}}table{{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}}
+th,td{{padding:6px 10px;text-align:right;border-bottom:1px solid var(--grid);white-space:nowrap}}
+th{{color:var(--ink2);font-weight:600;font-size:12px}}th:first-child,td:first-child{{text-align:left;white-space:normal}}
+tr.total td{{font-weight:650;border-top:1px solid var(--muted)}}
+details{{margin-top:10px}}summary{{cursor:pointer;color:var(--ink2);font-size:13px}}
+.note{{color:var(--muted);font-size:12px;margin-top:8px}}
+@media print{{body{{background:var(--page)}}section,.tile{{break-inside:avoid}}}}
 """
+
+
+def css() -> str:
+    """Page CSS for the current theme."""
+    return _CSS_TEMPLATE.format(s0=SERIES[0], s1=SERIES[1], scheme=THEME, **{k: v for k, v in T.items() if isinstance(v, str)})
+
 
 
 def _table(df: pd.DataFrame, fmt: dict, total_row: bool = False) -> str:
@@ -785,7 +819,7 @@ def build_report(rd: ReportData, out_path: str | None = None) -> str:
                'month-end. Re-pull after the 3rd of next month for final numbers.</p>') if m['partial'] else ''
 
     doc = f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>AWS Executive Report</title><style>{CSS}</style></head>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>AWS Executive Report</title><style>{css()}</style></head>
 <body><main>
 <header><div><h1>AWS Executive Cost Report</h1><p class="sub">{mname} · AWS Services budget {_money(b)}/month</p></div>
 <div class="meta">Data: {rd.df['Date'].min():%b %Y} – {rd.month:%b %Y} · Net unblended cost<br>Generated {datetime.now():%Y-%m-%d %H:%M}</div></header>
@@ -817,7 +851,7 @@ Separating them shows the true AWS Services trend against the {_money(b)} budget
 <p class="lede">EC2 Compute that is not covered by Savings Plans is billed on-demand. Months where the Savings Plans fee drops to $0 indicate a coverage gap.</p>{fh[6]}</section>
 
 <section><h2>Marketplace (outside the AWS Services budget)</h2>
-<p class="lede">Charges by vendor, last 24 months. Darker = larger charge.</p>{fh[7]}
+<p class="lede">Charges by vendor, last 24 months. {'Brighter' if THEME == 'dark' else 'Darker'} = larger charge.</p>{fh[7]}
 <div class="cols"><div><h3>Vendors — trailing 12 months vs prior 12 months</h3>{mkv_html}</div>
 <div><h3>Expected Marketplace charges — next 6 months</h3>{ren_html}{ren_total}</div></div>
 <details><summary>Classification check</summary>{cls_html}
@@ -846,8 +880,10 @@ def main(argv=None):
     p.add_argument('--month', help='Report month YYYY-MM (default: latest available)')
     p.add_argument('--budget', type=float, default=MONTHLY_BUDGET)
     p.add_argument('--include-tax-in-budget', action='store_true')
+    p.add_argument('--theme', choices=list(THEMES), default='dark')
     p.add_argument('--out', help='Output HTML path')
     a = p.parse_args(argv)
+    set_theme(a.theme)
 
     df = load_cost_data(a.folder)
     rd = analyze(df, a.month, a.budget, a.include_tax_in_budget)
