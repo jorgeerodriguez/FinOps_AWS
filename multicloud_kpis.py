@@ -43,7 +43,9 @@ GCP_CREDITS = 'GCP_Credits_History.csv'
 GCP_PROJECT = 'billing-query-371121'
 GCP_TABLE = 'billing-query-371121.all_billing_data.gcp_billing_export_v1_01C5AB_0209B1_81C892'
 
-AWS_MONTHLY_BUDGET = 550_000
+# Monthly Cloud Services budgets (Marketplace and Tax excluded)
+AWS_MONTHLY_BUDGET = 500_000
+GCP_MONTHLY_BUDGET = 300_000
 
 SVC, MKT, TAX = 'Cloud Services', 'Marketplace', 'Tax'
 AWS, GCP = 'AWS', 'GCP'
@@ -139,7 +141,7 @@ class KPIData:
     end: pd.Timestamp
     y1: tuple
     y2: tuple
-    budget: float
+    budgets: dict
     k: dict = field(default_factory=dict)
 
 
@@ -151,14 +153,15 @@ def _yr_label(w):
     return f'{w[0]:%b %y}–{w[1]:%b %y}'
 
 
-def compute(df: pd.DataFrame, end_month: str | None = None, budget: float = AWS_MONTHLY_BUDGET) -> KPIData:
+def compute(df: pd.DataFrame, end_month: str | None = None, aws_budget: float = AWS_MONTHLY_BUDGET,
+            gcp_budget: float = GCP_MONTHLY_BUDGET) -> KPIData:
     # latest month BOTH clouds have
     common_end = min(df[df['Provider'] == p]['Date'].max() for p in (AWS, GCP))
     end = pd.Timestamp(end_month) if end_month else common_end
     y2 = (end - relativedelta(months=11), end)
     y1 = (end - relativedelta(months=23), end - relativedelta(months=12))
     df = df[(df['Date'] >= y1[0]) & (df['Date'] <= end)].copy()
-    kd = KPIData(df=df, end=end, y1=y1, y2=y2, budget=budget)
+    kd = KPIData(df=df, end=end, y1=y1, y2=y2, budgets={AWS: aws_budget, GCP: gcp_budget})
     k = kd.k
 
     monthly = df.pivot_table(index='Date', columns=['Provider', 'Category'], values='Cost', aggfunc='sum').fillna(0)
@@ -245,10 +248,16 @@ def compute(df: pd.DataFrame, end_month: str | None = None, budget: float = AWS_
     add('Effective discount vs list price', 'pct', np.nan, np.nan, disc(y1), disc(y2), higher_is_bad=False,
         note='GCP only (AWS extract has no list price)')
 
-    # AWS budget
-    aws_y2 = svc[AWS].loc[y2[0]:y2[1]]
-    add(f'AWS months within {_money(budget)} budget', 'count', int((svc[AWS].loc[y1[0]:y1[1]] <= budget).sum()),
-        int((aws_y2 <= budget).sum()), np.nan, np.nan, higher_is_bad=False)
+    # Budget attainment (Cloud Services vs each cloud's monthly budget)
+    def within(p, w):
+        return int((svc[p].loc[w[0]:w[1]] <= kd.budgets[p]).sum())
+    add('Months within Cloud Services budget', 'count', within(AWS, y1), within(AWS, y2), within(GCP, y1), within(GCP, y2),
+        higher_is_bad=False, note=f'AWS {_money(aws_budget)}/mo · GCP {_money(gcp_budget)}/mo')
+    def variance(p, w):
+        return kd.budgets[p] * 12 - svc[p].loc[w[0]:w[1]].sum()
+    add('Cloud Services budget variance (12 mo)', 'var', variance(AWS, y1), variance(AWS, y2), variance(GCP, y1),
+        variance(GCP, y2), variance(AWS, y1) + variance(GCP, y1), variance(AWS, y2) + variance(GCP, y2),
+        higher_is_bad=False, note='budget minus actual; negative = over budget')
 
     k['scorecard'] = pd.DataFrame(rows)
 
@@ -355,9 +364,10 @@ def chart_runrate(kd: KPIData) -> go.Figure:
         last = svc[p].rolling(3).mean().iloc[-1]
         fig.add_annotation(x=svc.index[-1], y=last, text=f'{p} {_money(last)}', showarrow=False, xanchor='left',
                            xshift=8, font=dict(color=INK, size=11))
-    fig.add_hline(y=kd.budget, line=dict(color=INK, width=1.5),
-                  annotation=dict(text=f'AWS budget {_money(kd.budget)}', font=dict(color=INK, size=11)),
-                  annotation_position='top left')
+    for p in (AWS, GCP):
+        fig.add_hline(y=kd.budgets[p], line=dict(color=C_PROVIDER[p], width=1.5),
+                      annotation=dict(text=f'{p} budget {_money(kd.budgets[p])}', font=dict(color=INK, size=11)),
+                      annotation_position='top left')
     fig = _layout(fig, 380)
     fig.update_layout(margin=dict(r=80))
     return fig
@@ -426,7 +436,7 @@ def chart_tagcov(kd: KPIData) -> go.Figure:
 def _fmt(v, f):
     if v is None or (isinstance(v, float) and np.isnan(v)):
         return '—'
-    return {'money': _money, 'pct': lambda x: f'{x:.1%}', 'count': lambda x: f'{int(x)} / 12'}[f](v)
+    return {'money': _money, 'var': _money, 'pct': lambda x: f'{x:.1%}', 'count': lambda x: f'{int(x)} / 12'}[f](v)
 
 
 def _delta(a, b, f, bad_up):
@@ -434,6 +444,9 @@ def _delta(a, b, f, bad_up):
         return '<td>—</td>'
     if f == 'money':
         txt, d = (_pct(b / a - 1) if a else '—'), b - a
+    elif f == 'var':
+        d = b - a
+        txt = ('+' if d > 0 else '') + _money(d)
     elif f == 'pct':
         d = b - a
         txt = f'{d * 100:+.1f} pts'
@@ -459,13 +472,13 @@ def scorecard_html(kd: KPIData) -> str:
             f'<div class="tbl"><table class="sc"><thead>{head}</thead><tbody>{"".join(body)}</tbody></table></div>')
 
 
-def build_report(kd: KPIData, out_path: str | None = None) -> str:
+def build_report(kd: KPIData, out_path: str | None = None, fc=None, include_forecast: bool = True) -> str:
     k = kd.k
     sc = k['scorecard'].set_index('KPI')
     out_path = out_path or os.path.join(HERE, f'Cloud_KPI_Report_{kd.end:%Y_%m}.html')
     t, rr = sc.loc['Total spend (all-in)'], sc.loc['Cloud Services run-rate (3-mo avg / month)']
     share = sc.loc['Share of Cloud Services spend']
-    aws_budget = sc.loc[f'AWS months within {_money(kd.budget)} budget']
+    within = sc.loc['Months within Cloud Services budget']
 
     def tile(label, value, detail, cls=''):
         return (f'<div class="tile"><div class="k">{label}</div><div class="v {cls}">{value}</div>'
@@ -476,9 +489,9 @@ def build_report(kd: KPIData, out_path: str | None = None) -> str:
         tile('Total cloud spend · last 12 mo', _money(t.ALL_Y2), f'<span class="{"bad" if g_all > 0 else "good"}">{_pct(g_all)}</span> vs prior 12 mo ({_money(t.ALL_Y1)})'),
         tile('Cloud Services run-rate', _money(rr.ALL_Y2) + '/mo', f'was {_money(rr.ALL_Y1)}/mo a year ago'),
         tile(f'<span class="dot" style="background:{C_PROVIDER[AWS]}"></span>AWS run-rate', _money(rr.AWS_Y2) + '/mo',
-             f'{_pct(rr.AWS_Y2 / rr.AWS_Y1 - 1)} YoY · {int(aws_budget.AWS_Y2)}/12 months within budget'),
+             f'{_pct(rr.AWS_Y2 / rr.AWS_Y1 - 1)} YoY · {int(within.AWS_Y2)}/12 months within {_money(kd.budgets[AWS])}'),
         tile(f'<span class="dot" style="background:{C_PROVIDER[GCP]}"></span>GCP run-rate', _money(rr.GCP_Y2) + '/mo',
-             f'<span class="bad">{_pct(rr.GCP_Y2 / rr.GCP_Y1 - 1)}</span> YoY'),
+             f'<span class="bad">{_pct(rr.GCP_Y2 / rr.GCP_Y1 - 1)}</span> YoY · {int(within.GCP_Y2)}/12 months within {_money(kd.budgets[GCP])}'),
         tile('GCP share of Cloud Services', f'{share.GCP_Y2:.0%}', f'was {share.GCP_Y1:.0%} in the prior 12 months'),
         tile('Marketplace · last 12 mo', _money(sc.loc['Marketplace'].ALL_Y2), f'AWS {_money(sc.loc["Marketplace"].AWS_Y2)} · GCP {_money(sc.loc["Marketplace"].GCP_Y2)}'),
     ]) + '</div>'
@@ -500,6 +513,11 @@ def build_report(kd: KPIData, out_path: str | None = None) -> str:
     figs = [chart_monthly(kd), chart_runrate(kd), chart_quarterly(kd), chart_movers(kd, GCP), chart_movers(kd, AWS),
             chart_genai(kd), chart_tagcov(kd)]
     fh = [_fig_html(f, i == 0) for i, f in enumerate(figs)]
+    forecast_html = ''
+    if include_forecast:
+        import cloud_forecast as cf
+        fc = fc or cf.forecast(kd.df, kd.budgets)
+        forecast_html = cf.html_section(fc)
     insights = '<ul class="ins a">' + ''.join(f'<li>{html.escape(i)}</li>' for i in k['insights']) + '</ul>'
     extra_css = """
 table.sc th{text-align:center}table.sc td{text-align:right}table.sc td:first-child{text-align:left;min-width:220px}
@@ -510,7 +528,7 @@ table.sc td:nth-child(4),table.sc td:nth-child(7){border-right:1px solid var(--g
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Cloud KPI Report</title><style>{fr.css()}{extra_css}</style></head>
 <body><main>
 <header><div><h1>AWS vs GCP — Cloud KPI Report</h1><p class="sub">Trailing 24 months · {_yr_label(kd.y1)} vs {_yr_label(kd.y2)}</p></div>
-<div class="meta">Net cost (GCP includes credits) · AWS budget {_money(kd.budget)}/mo<br>Generated {datetime.now():%Y-%m-%d %H:%M}</div></header>
+<div class="meta">Net cost (GCP includes credits) · Cloud Services budgets: AWS {_money(kd.budgets[AWS])}/mo · GCP {_money(kd.budgets[GCP])}/mo<br>Generated {datetime.now():%Y-%m-%d %H:%M}</div></header>
 {tiles}
 <section><h2>Key findings</h2>{insights}</section>
 <section><h2>KPI scorecard</h2>{scorecard_html(kd)}</section>
@@ -525,6 +543,7 @@ table.sc td:nth-child(4),table.sc td:nth-child(7){border-right:1px solid var(--g
 <section><h2>Allocation readiness — environment tag / label coverage</h2>
 <p class="lede">Share of taggable Cloud Services spend that carries an environment tag (AWS, from Jan 2025) or label (GCP).</p>{fh[6]}</section>
 <section><h2>One-time and lumpy charges</h2><p class="lede">Single-month charges ≥ $100K and over 3× that service's median month — prepaid commits, annual licenses.</p>{lumpy_html}</section>
+{forecast_html}
 <p class="note">Sources: FinOps_AWS/Monthly_Cost_For_*.csv · FinOps_GCP/{GCP_HISTORY} (BigQuery billing export).</p>
 </main></body></html>"""
     with open(out_path, 'w', encoding='utf-8') as f:
@@ -535,7 +554,8 @@ table.sc td:nth-child(4),table.sc td:nth-child(7){border-right:1px solid var(--g
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--month', help='End month YYYY-MM (default: latest month both clouds have)')
-    p.add_argument('--budget', type=float, default=AWS_MONTHLY_BUDGET)
+    p.add_argument('--aws-budget', type=float, default=AWS_MONTHLY_BUDGET)
+    p.add_argument('--gcp-budget', type=float, default=GCP_MONTHLY_BUDGET)
     p.add_argument('--refresh-gcp', action='store_true', help='Re-query BigQuery before building')
     p.add_argument('--out')
     p.add_argument('--theme', choices=list(fr.THEMES), default='dark')
@@ -543,7 +563,7 @@ def main(argv=None):
     set_theme(a.theme)
     if a.refresh_gcp:
         print('GCP history refreshed:', refresh_gcp_history(a.month))
-    kd = compute(load_all(), a.month, a.budget)
+    kd = compute(load_all(), a.month, a.aws_budget, a.gcp_budget)
     print('Report written:', build_report(kd, a.out))
     for line in kd.k['insights']:
         print('  -', line)

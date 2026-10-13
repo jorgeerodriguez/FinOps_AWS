@@ -44,7 +44,7 @@ from dateutil.relativedelta import relativedelta
 # --------------------------------------------------------------------------------------
 # Configuration
 # --------------------------------------------------------------------------------------
-MONTHLY_BUDGET = 550_000
+MONTHLY_BUDGET = 500_000
 MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
 
 AWS, MKT, TAX = 'AWS Services', 'Marketplace', 'Tax'
