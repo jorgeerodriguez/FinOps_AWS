@@ -472,10 +472,10 @@ def scorecard_html(kd: KPIData) -> str:
             f'<div class="tbl"><table class="sc"><thead>{head}</thead><tbody>{"".join(body)}</tbody></table></div>')
 
 
-def build_report(kd: KPIData, out_path: str | None = None, fc=None, include_forecast: bool = True) -> str:
+def build_report(kd: KPIData, out_path: str | None = None, fc=None, include_forecast: bool = True, suffix: str = '') -> str:
     k = kd.k
     sc = k['scorecard'].set_index('KPI')
-    out_path = out_path or os.path.join(HERE, f'Cloud_KPI_Report_{kd.end:%Y_%m}.html')
+    out_path = out_path or os.path.join(HERE, f'Cloud_KPI_Report_{kd.end:%Y_%m}{suffix}.html')
     t, rr = sc.loc['Total spend (all-in)'], sc.loc['Cloud Services run-rate (3-mo avg / month)']
     share = sc.loc['Share of Cloud Services spend']
     within = sc.loc['Months within Cloud Services budget']
@@ -520,7 +520,7 @@ def build_report(kd: KPIData, out_path: str | None = None, fc=None, include_fore
         fc = fc or cf.forecast(kd.df, kd.budgets)
         dt = fd.build(kd.df, fc)
         detail_path = fd.build_detail_report(dt, os.path.join(os.path.dirname(os.path.abspath(out_path)),
-                                                              f'Cloud_Forecast_Detail_{kd.end:%Y_%m}.html'))
+                                                              f'Cloud_Forecast_Detail_{kd.end:%Y_%m}{suffix}.html'))
         g = kd.df[(kd.df['Provider'] == GCP) & (kd.df['Category'] == SVC)].groupby('project')['Cost'].sum()
         fd.write_owner_template(g.sort_values(ascending=False).index)
         forecast_html = cf.html_section(fc)
@@ -568,12 +568,13 @@ def main(argv=None):
     p.add_argument('--refresh-gcp', action='store_true', help='Re-query BigQuery before building')
     p.add_argument('--out')
     p.add_argument('--theme', choices=list(fr.THEMES), default='dark')
+    p.add_argument('--suffix', default='', help="Added to output file names, e.g. '_by_owner' (keeps earlier reports)")
     a = p.parse_args(argv)
     set_theme(a.theme)
     if a.refresh_gcp:
         print('GCP history refreshed:', refresh_gcp_history(a.month))
     kd = compute(load_all(), a.month, a.aws_budget, a.gcp_budget)
-    print('Report written:', build_report(kd, a.out))
+    print('Report written:', build_report(kd, a.out, suffix=a.suffix))
     for line in kd.k['insights']:
         print('  -', line)
 

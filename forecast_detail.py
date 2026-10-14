@@ -157,8 +157,21 @@ def project_family(name: str) -> tuple[str, str]:
 def load_owners() -> pd.DataFrame | None:
     if not os.path.exists(OWNERS_FILE):
         return None
-    o = pd.read_csv(OWNERS_FILE).fillna('')
-    return o if 'owner' in o.columns and o['owner'].str.strip().ne('').any() else None
+    o = pd.read_csv(OWNERS_FILE, dtype=str).fillna('')
+    for c in o.columns:
+        o[c] = o[c].str.strip()
+    o = o.drop_duplicates('project', keep='last')
+    return o if 'owner' in o.columns and o['owner'].ne('').any() else None
+
+
+SHARED_OWNER = 'Shared (no project)'      # GCP Support and other billing-account-level charges
+UNASSIGNED = 'Unassigned'
+
+
+def owner_map(owners: pd.DataFrame, projects) -> pd.Series:
+    m = owners.set_index('project')['owner'].reindex(projects).fillna('')
+    m[m.eq('') & m.index.str.startswith('(')] = SHARED_OWNER
+    return m.replace('', UNASSIGNED)
 
 
 def write_owner_template(projects: pd.Series) -> str:
@@ -185,6 +198,8 @@ class Detail:
     env_split: pd.DataFrame | None = None
     ramping: pd.DataFrame | None = None
     owners: pd.DataFrame | None = None
+    owner_projects: dict = field(default_factory=dict)  # owner -> per-project forecast table
+    unassigned: pd.DataFrame | None = None
 
 
 def _series_by(df, provider, dim, months_idx):
@@ -280,16 +295,57 @@ def build(df: pd.DataFrame, fc: cf.Forecast, top_n: int = TOP_N) -> Detail:
     # Owner roll-up (optional mapping file)
     owners = load_owners()
     if owners is not None:
-        m = owners.set_index('project')['owner'].replace('', 'Unassigned')
-        own = g.T.groupby(m.reindex(g.columns).fillna('Unassigned')).sum().T
-        rows = []
-        for o in own.columns:
-            lf = forecast_line(o, own[o], fc.horizon)
-            rows.append({'Owner': o, 'Projects': int((m.reindex(g.columns).fillna('Unassigned') == o).sum()),
-                         '2026 Jan–Sep': own[o].sum(), 'Exit run-rate /mo': own[o].tail(3).mean(),
-                         f'FY{cf.FORECAST_YEAR} forecast': lf.forecast.loc[fc.months].sum(), 'Model': lf.model})
-        dt.owners = pd.DataFrame(rows).set_index('Owner').sort_values(f'FY{cf.FORECAST_YEAR} forecast', ascending=False)
+        _owner_rollup(dt, g, owners)
     return dt
+
+
+def _owner_rollup(dt: Detail, g: pd.DataFrame, owners: pd.DataFrame) -> None:
+    """Per-owner forecast = sum of that owner's per-project forecasts, so the owner number always matches the
+    project list underneath it. 'Allocated' spreads the top-down GCP base across owners by those shares, so the
+    owner targets add up exactly to the plan number."""
+    fc, fy = dt.fc, f'FY{cf.FORECAST_YEAR} forecast'
+    m = owner_map(owners, g.columns)
+    billed = [p for p in g.columns if g[p].sum() >= 1]
+    proj = {p: forecast_line(p, g[p], fc.horizon) for p in billed}
+    info = owners.set_index('project').reindex(g.columns).fillna('')
+
+    own_spend = g[billed].T.groupby(m[billed]).sum().T
+    order = own_spend.sum().sort_values(ascending=False).index
+    order = [o for o in order if o not in (SHARED_OWNER, UNASSIGNED)] + [o for o in (SHARED_OWNER, UNASSIGNED) if o in own_spend]
+
+    lines = []
+    for o in order:
+        ps = [p for p in billed if m[p] == o]
+        fcast = sum(proj[p].forecast for p in ps)
+        lo = sum(proj[p].lo for p in ps)
+        hi = sum(proj[p].hi for p in ps)
+        mae = float(np.sqrt(sum(proj[p].mae ** 2 for p in ps)))      # project errors treated as independent
+        exit_rr = own_spend[o].tail(3).mean()
+        lf = LineForecast(o, own_spend[o], fcast, lo, hi, f'Sum of {len(ps)} project forecast{"s" if len(ps) != 1 else ""}',
+                          mae, mae / exit_rr if exit_rr else np.nan, {})
+        lines.append(lf)
+        rows = []
+        for p in sorted(ps, key=lambda p: -g[p].sum()):
+            fam, env = project_family(p)
+            rows.append({'Project': p, 'Family': info.loc[p, 'family'] or fam, 'Env': info.loc[p, 'environment'] or env,
+                         '2026 Jan–Sep': g[p].sum(), 'Exit run-rate /mo': g[p].tail(3).mean(),
+                         fy: proj[p].forecast.loc[fc.months].sum(), 'Model': proj[p].model, 'Confidence': proj[p].confidence})
+        dt.owner_projects[o] = pd.DataFrame(rows).set_index('Project')
+    dt.lines['GCP owners'] = lines
+
+    t = _summarize_lines(lines, fc)
+    t.insert(0, 'Projects', [len(dt.owner_projects[o]) for o in t.index])
+    t.insert(2, 'Share of 2026', t['2026 Jan–Sep'] / t['2026 Jan–Sep'].sum())
+    t['vs exit run-rate'] = t[fy] / (t['Exit run-rate /mo'] * 12) - 1
+    base = fc.summary['fy'][mk.GCP]['Base']
+    t['Allocated (ties to plan)'] = base * t[fy] / t[fy].sum()
+    dt.owners = t
+    dt.tables['GCP owners'] = t
+    dt.totals['GCP owners'] = t[fy].sum()
+
+    un = [p for p in billed if m[p] == UNASSIGNED]
+    dt.unassigned = (pd.DataFrame({'2026 Jan–Sep': g[un].sum(), 'Exit run-rate /mo': g[un].tail(3).mean()})
+                     .sort_values('2026 Jan–Sep', ascending=False) if un else pd.DataFrame())
 
 
 # --------------------------------------------------------------------------------------
@@ -361,6 +417,8 @@ def _fmt_table(t: pd.DataFrame, index_name: str, cols=None) -> str:
     fmts['Share of 2026'] = lambda v: f'{v:.0%}'
     fmts['Projects'] = lambda v: f'{int(v)}'
     fmts['Δ vs exit × 12'] = lambda v: '$0' if abs(v) < 500 else ('+' if v > 0 else '') + _money(v)
+    if 'Allocated (ties to plan)' in t.columns:
+        fmts['Allocated (ties to plan)'] = lambda v: f'<b>{_money(v)}</b>'
     return fr._table(t, fmts)
 
 
@@ -387,6 +445,22 @@ def _reconcile_verdict(dt: Detail) -> str:
             f'cloud total — review the ramping lines below before locking the budget.')
 
 
+def _owner_bullet(dt: Detail) -> str:
+    if dt.owners is None:
+        return ''
+    t = dt.owners
+    fy = f'FY{cf.FORECAST_YEAR} forecast'
+    named = t[~t.index.isin([SHARED_OWNER, UNASSIGNED])]
+    covered = named['2026 Jan–Sep'].sum() / t['2026 Jan–Sep'].sum()
+    al = 'Allocated (ties to plan)'
+    return (f'<li><b>GCP by owner ({fy}, allocated so owners add up to the {_money(dt.fc.summary["fy"][mk.GCP]["Base"])} base):</b> '
+            + ', '.join(f'{o} {_money(r[al])}' for o, r in named.iterrows()) +
+            (f', shared (Support, no project) {_money(t.loc[SHARED_OWNER, al])}' if SHARED_OWNER in t.index else '') +
+            (f', unassigned {_money(t.loc[UNASSIGNED, al])}' if UNASSIGNED in t.index else '') +
+            f'. Named owners cover {covered:.0%} of 2026 GCP Services; the top two owners account for '
+            f'{named["Share of 2026"].head(2).sum():.0%}.</li>')
+
+
 def leadership_section(dt: Detail, detail_file: str | None = None) -> str:
     """Compact per-service view for the CIO/CTO report."""
     S = dt.fc.summary
@@ -405,12 +479,57 @@ Summing the services gives an independent <b>bottom-up</b> check on the cloud-le
 {fr._fig_html(chart_reconciliation(dt), False)}
 <ul class="ins a"><li><b>Reconciliation:</b> {_reconcile_text(dt)}. {_reconcile_verdict(dt)}</li>
 <li><b>GCP projects:</b> the top {TOP_N} projects are {dt.tables['GCP projects'].iloc[:-1]['2026 Jan–Sep'].sum() / dt.tables['GCP projects']['2026 Jan–Sep'].sum():.0%} of 2026 GCP Services.
-Fastest-ramping: {', '.join(f'{fr._short(n, 28)} ({_money(r["Q1 2026 avg /mo"])} → {_money(r["Exit run-rate /mo"])}/mo)' for n, r in gr.iterrows())}.</li></ul>
+Fastest-ramping: {', '.join(f'{fr._short(n, 28)} ({_money(r["Q1 2026 avg /mo"])} → {_money(r["Exit run-rate /mo"])}/mo)' for n, r in gr.iterrows())}.</li>
+{_owner_bullet(dt)}</ul>
 <h3>AWS — top 10 services</h3>{_fmt_table(top('AWS services'), 'AWS service', LEAD_COLS)}
 <h3>GCP — top 10 services</h3>{_fmt_table(top('GCP services'), 'GCP service', LEAD_COLS)}
 <p class="note">Confidence (±% typical miss) comes from each model's backtest: how far off it was when re-predicting 1–3 months ahead inside 2026
 (High &lt; 10% of run-rate, Medium &lt; 25%, Low above). Low-confidence lines are where owners' input matters most.</p>
 {link}</section>"""
+
+
+def _owner_section(dt: Detail) -> str:
+    fy = f'FY{cf.FORECAST_YEAR} forecast'
+    t = dt.owners
+    S = dt.fc.summary
+    chart = fr._fig_html(chart_small_multiples(dt, 'GCP owners', mk.C_PROVIDER[mk.GCP]), False)
+    cols = ['Projects', '2026 Jan–Sep', 'Share of 2026', 'Exit run-rate /mo', fy, 'FY range',
+            'Δ vs exit × 12', 'Allocated (ties to plan)', 'Confidence']
+    summary = _fmt_table(t, 'Owner', cols)
+    gap = dt.totals['GCP owners'] / S['fy'][mk.GCP]['Base'] - 1
+    budget_share = ''.join(
+        f'<li><b>{html.escape(o)}</b> ({int(r["Projects"])} project{"s" if r["Projects"] != 1 else ""}, '
+        f'{r["Share of 2026"]:.0%} of 2026 GCP Services): exit run-rate {_money(r["Exit run-rate /mo"])}/mo → '
+        f'{_money(r[fy])} bottom-up for {fy[2:6]} ({"+" if r["vs exit run-rate"] >= 0 else ""}{r["vs exit run-rate"]:.0%} vs '
+        f'run-rate × 12); <b>allocated {_money(r["Allocated (ties to plan)"])}</b>; confidence {r["Confidence"]}.</li>'
+        for o, r in t.iterrows())
+    per_owner = ''
+    for o, pt in dt.owner_projects.items():
+        if pt.empty:
+            continue
+        pt = pt.copy()
+        pt.index = [fr._short(i, 40) for i in pt.index]
+        pt.index.name = 'Project'
+        fm = {'2026 Jan–Sep': _money, 'Exit run-rate /mo': _money, fy: _money}
+        per_owner += (f'<details><summary>{html.escape(o)} — {len(pt)} project{"s" if len(pt) != 1 else ""} · '
+                      f'{_money(pt[fy].sum())} {fy[:6]}</summary>{fr._table(pt, fm)}</details>')
+    un = ''
+    if dt.unassigned is not None and len(dt.unassigned):
+        u = dt.unassigned.copy()
+        u.index.name = 'Project without an owner'
+        un = (f'<h3>Still unassigned</h3>{fr._table(u, {c: _money for c in u.columns})}'
+              f'<p class="note">Add an owner in <code>{html.escape(os.path.basename(OWNERS_FILE))}</code> and re-run.</p>')
+    return f"""
+<section><h2>GCP — by owner (SVP/VP view)</h2>
+<p class="lede">Projects rolled up by owner from <code>{html.escape(os.path.basename(OWNERS_FILE))}</code>. Each owner's forecast is the
+sum of their projects' forecasts (each project picks its own model), so it always matches the project list below. "{SHARED_OWNER}" is GCP Support and other charges billed to the
+account rather than a project.</p>
+<ul class="ins a">{budget_share}
+<li>Project forecasts sum to {_money(dt.totals['GCP owners'])} vs the top-down GCP base {_money(S['fy'][mk.GCP]['Base'])} ({gap:+.0%});
+the gap is growth from projects that don't exist yet. <b>Allocated</b> spreads the base across owners by their bottom-up share, so
+owner targets add up exactly to the plan.</li></ul>
+{chart}{summary}
+<h3>Projects by owner</h3>{per_owner}{un}</section>"""
 
 
 def build_detail_report(dt: Detail, out_path: str | None = None) -> str:
@@ -443,9 +562,10 @@ def build_detail_report(dt: Detail, out_path: str | None = None) -> str:
     env_html = _fmt_table(env, 'Environment (from project name)')
     nonprod = env.loc[env.index == 'non-prod', '2026 Jan–Sep'].sum() / env['2026 Jan–Sep'].sum() if 'non-prod' in env.index else 0
 
-    owners_html = (f'<h3>By owner</h3>{_fmt_table(dt.owners, "Owner")}' if dt.owners is not None else
-                   f'<p class="note">Owner roll-up: fill in <code>{html.escape(os.path.basename(OWNERS_FILE))}</code> '
-                   f'(owner / department per project) and re-run to get a forecast per SVP/VP.</p>')
+    owners_html = '' if dt.owners is not None else (
+        f'<p class="note">Owner roll-up: fill in <code>{html.escape(os.path.basename(OWNERS_FILE))}</code> '
+        f'(owner / department per project) and re-run to get a forecast per SVP/VP.</p>')
+    owner_section = _owner_section(dt) if dt.owners is not None else ''
 
     doc = f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Cloud Forecast Detail</title>
@@ -487,6 +607,7 @@ planning number.</li></ul>
 <p class="note">Little or no spend in Q1 2026 and ≥ $3K/month now. These carry the most forecast risk — confirm plans with owners.</p>
 {owners_html}</section>
 
+{owner_section}
 <section><h2>GCP — top {TOP_N} projects</h2>{fh['proj']}{_fmt_table(dt.tables['GCP projects'], 'GCP project', cols_full)}</section>
 <p class="note">Sources: FinOps_AWS/Monthly_Cost_For_*.csv · FinOps_GCP/{mk.GCP_HISTORY}. Logic: forecast_detail.py.</p>
 </main></body></html>"""
