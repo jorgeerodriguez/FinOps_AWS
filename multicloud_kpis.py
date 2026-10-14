@@ -516,8 +516,17 @@ def build_report(kd: KPIData, out_path: str | None = None, fc=None, include_fore
     forecast_html = ''
     if include_forecast:
         import cloud_forecast as cf
+        import forecast_detail as fd
         fc = fc or cf.forecast(kd.df, kd.budgets)
+        dt = fd.build(kd.df, fc)
+        detail_path = fd.build_detail_report(dt, os.path.join(os.path.dirname(os.path.abspath(out_path)),
+                                                              f'Cloud_Forecast_Detail_{kd.end:%Y_%m}.html'))
+        g = kd.df[(kd.df['Provider'] == GCP) & (kd.df['Category'] == SVC)].groupby('project')['Cost'].sum()
+        fd.write_owner_template(g.sort_values(ascending=False).index)
         forecast_html = cf.html_section(fc)
+        # per-service section goes right after the forecast executive summary
+        cut = forecast_html.index('</section>') + len('</section>')
+        forecast_html = forecast_html[:cut] + fd.leadership_section(dt, detail_path) + forecast_html[cut:]
     insights = '<ul class="ins a">' + ''.join(f'<li>{html.escape(i)}</li>' for i in k['insights']) + '</ul>'
     extra_css = """
 table.sc th{text-align:center}table.sc td{text-align:right}table.sc td:first-child{text-align:left;min-width:220px}
