@@ -155,6 +155,40 @@ def forecast(df: pd.DataFrame, budgets: dict | None = None, damping: float = DAM
     return fc
 
 
+def contract_schedule(s: pd.Series, horizon: pd.DatetimeIndex):
+    """Classify one Marketplace line's billing cadence from its basis-year months and project it over `horizon`.
+
+    Returns (cadence, amount_per_charge, schedule Series) or None if it was never billed.
+      monthly   — billed in >=5 months, or each of the last 3 -> average of the last 3 months every month
+      regular   — >=2 charges with a regular gap (quarterly, semiannual, ...) -> last amount, same cadence
+      annual    — 1 charge -> same amount, same month next year
+    """
+    billed = s[s > MIN_CHARGE]
+    n = len(billed)
+    if n == 0:
+        return None
+    sched = pd.Series(0.0, index=horizon)
+    if n >= 5 or (s.tail(3) > MIN_CHARGE).all():
+        cadence, amount = 'Monthly', s.tail(3).mean()
+        sched[:] = amount
+    elif n >= 2:
+        gaps = np.diff([d.year * 12 + d.month for d in billed.index])
+        k = int(round(np.median(gaps)))
+        cadence = {1: 'Monthly', 2: 'Bimonthly', 3: 'Quarterly', 4: 'Every 4 months', 6: 'Semiannual'}.get(k, f'Every {k} months')
+        amount = billed.iloc[-1]
+        d = billed.index[-1] + relativedelta(months=k)
+        while d <= horizon[-1]:
+            if d in sched.index:
+                sched[d] = amount
+            d += relativedelta(months=k)
+    else:
+        cadence, amount = 'Annual', billed.iloc[-1]
+        d = billed.index[-1] + relativedelta(years=1)
+        if d in sched.index:
+            sched[d] = amount
+    return cadence, amount, sched
+
+
 def _marketplace(fc: Forecast, df: pd.DataFrame, basis: pd.DataFrame, months_idx) -> None:
     m = basis[basis['Category'] == mk.MKT].copy()
     m['Contract'] = [_contract_key(p, s) for p, s in zip(m['Provider'], m['Service'])]
@@ -162,30 +196,10 @@ def _marketplace(fc: Forecast, df: pd.DataFrame, basis: pd.DataFrame, months_idx
 
     rows, detail = [], {}
     for (p, c), s in piv.items():
-        billed = s[s > MIN_CHARGE]
-        n = len(billed)
-        if n == 0:
+        res = contract_schedule(s, fc.horizon)
+        if res is None:
             continue
-        last3_billed = (s.tail(3) > MIN_CHARGE).all()
-        sched = pd.Series(0.0, index=fc.horizon)
-        if n >= 5 or last3_billed:
-            cadence, amount = 'Monthly', s.tail(3).mean()
-            sched[:] = amount
-        elif n >= 2:
-            gaps = np.diff([d.year * 12 + d.month for d in billed.index])
-            k = int(round(np.median(gaps)))
-            cadence = {1: 'Monthly', 2: 'Bimonthly', 3: 'Quarterly', 4: 'Every 4 months', 6: 'Semiannual'}.get(k, f'Every {k} months')
-            amount = billed.iloc[-1]
-            d = billed.index[-1] + relativedelta(months=k)
-            while d <= fc.horizon[-1]:
-                if d in sched.index:
-                    sched[d] = amount
-                d += relativedelta(months=k)
-        else:
-            cadence, amount = 'Annual', billed.iloc[-1]
-            d = billed.index[-1] + relativedelta(years=1)
-            if d in sched.index:
-                sched[d] = amount
+        cadence, amount, sched = res
         detail[(p, c)] = sched
         fy = sched[sched.index.year == FORECAST_YEAR]
         rows.append(dict(Provider=p, Contract=c, Vendor=fr.vendor_label(c) if 'Claude' not in c else 'Anthropic',
