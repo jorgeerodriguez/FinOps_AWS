@@ -178,6 +178,75 @@ def reconcile_with_monthly_files(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # --------------------------------------------------------------------------------------
+# Account owners (same idea as gcp_project_owners.csv)
+# --------------------------------------------------------------------------------------
+OWNERS_FILE = os.path.join(HERE, 'aws_account_owners.csv')
+OWNER_FIELDS = ['service_name', 'owner', 'department']          # filled in by hand — never overwritten
+
+
+def account_family(name: str) -> tuple[str, str]:
+    """'AmperWave-NonProd' -> ('amperwave', 'non-prod'); 'WOS-PROD-01' -> ('wos', 'prod'); 'Unity Dev' -> ('unity', 'non-prod')."""
+    import re
+    tokens = [t for t in re.split(r'[-_\s]+', str(name).lower()) if t]
+    env = next((fd.ENV_TOKENS[t] for t in tokens if t in fd.ENV_TOKENS), 'unspecified')
+    fam = '-'.join(t for t in tokens if t not in fd.ENV_TOKENS and not t.isdigit()) or str(name).lower()
+    return fam, env
+
+
+def load_account_owners(path: str = OWNERS_FILE) -> pd.DataFrame | None:
+    if not os.path.exists(path):
+        return None
+    o = pd.read_csv(path, dtype=str).fillna('')
+    o['account_id'] = o['account_id'].str.strip().str.zfill(12)  # Excel drops leading zeros
+    return o
+
+
+def update_owner_file(df: pd.DataFrame, path: str = OWNERS_FILE) -> str:
+    """Create aws_account_owners.csv, or refresh it: add new accounts and update the reference columns
+    (name, spend, top services) while keeping whatever was typed into service_name / owner / department."""
+    d = df[~df.get('Partial', False)] if 'Partial' in df else df
+    svc = d[d['Category'] == SVC]
+    spend = svc.groupby('AccountId')['Cost'].sum()
+    months = sorted(svc['Date'].unique())[-3:]
+    exit_rr = svc[svc['Date'].isin(months)].groupby('AccountId')['Cost'].sum() / max(len(months), 1)
+    mkt = d[d['Category'] == MKT].groupby('AccountId')['Cost'].sum()
+    names = d.groupby('AccountId')['AccountName'].first()
+
+    def top_services(aid, n=3):
+        s = svc[svc['AccountId'] == aid].groupby('Service')['Cost'].sum()
+        s = s[s > 0].sort_values(ascending=False)
+        return '; '.join(f'{fr._short(k, 28)} {v / s.sum():.0%}' for k, v in s.head(n).items()) if s.sum() > 0 else ''
+
+    first, last = pd.Timestamp(d['Date'].min()), pd.Timestamp(d['Date'].max())
+    span = f'{first:%b}_{last:%b}'.lower()
+    rows = []
+    for aid in names.index:
+        fam, env = account_family(names[aid])
+        rows.append({'account_id': str(aid).zfill(12), 'account_name': names[aid], 'family': fam, 'environment': env,
+                     'service_name': '', 'owner': '', 'department': '',
+                     f'services_{BASIS_YEAR}_{span}': round(spend.get(aid, 0.0), 2),
+                     'services_exit_run_rate_mo': round(exit_rr.get(aid, 0.0), 2),
+                     f'marketplace_{BASIS_YEAR}_{span}': round(mkt.get(aid, 0.0), 2),
+                     'top_aws_services': top_services(aid)})
+    fresh = pd.DataFrame(rows)
+
+    old = load_account_owners(path)
+    if old is not None:
+        keep = old.set_index('account_id')
+        for col in OWNER_FIELDS + ['family', 'environment']:
+            if col in keep:
+                filled = keep[col].reindex(fresh['account_id'])
+                mask = filled.notna().to_numpy() & (filled.fillna('') != '').to_numpy()
+                fresh.loc[mask, col] = filled[mask].to_numpy()
+        gone = keep.index.difference(fresh['account_id'])           # accounts no longer billed: keep the rows
+        if len(gone):
+            fresh = pd.concat([fresh, keep.loc[gone].reset_index()], ignore_index=True)
+    fresh = fresh.sort_values(f'services_{BASIS_YEAR}_{span}', ascending=False, na_position='last')
+    fresh.to_csv(path, index=False)
+    return path
+
+
+# --------------------------------------------------------------------------------------
 # Forecast
 # --------------------------------------------------------------------------------------
 @dataclass
@@ -638,6 +707,7 @@ def main(argv=None):
     a = ap.parse_args(argv)
     fr.set_theme(a.theme)
     df = load_cached() if a.cached else pull()
+    print('Owners file:', update_owner_file(df))
     recon = reconcile_with_monthly_files(df)
     fc = forecast_2027(df, a.budget)
     print('Report written:', build_report(fc, a.out, recon))
