@@ -49,7 +49,15 @@ SSO_REGION = 'us-east-1'
 
 BASIS_YEAR = 2026
 FORECAST_YEAR = 2027
-MONTHLY_BUDGET = 500_000                  # AWS Cloud Services (Marketplace and Tax excluded)
+MONTHLY_BUDGET = 500_000                  # AWS monthly budget (Marketplace excluded) — see BUDGET_BASIS
+# What the $500K is compared against:
+#   'services' — AWS Cloud Services, before tax
+#   'console'  — AWS Cloud Services + the tax on them = the "AWS" billing-entity cost the Cost Explorer console shows
+#                when Marketplace is excluded (e.g. AWS_Jan_Sep_Cost_per_Account.csv)
+BUDGET_BASIS = 'services'
+BASIS_LABEL = {'services': 'AWS Cloud Services (pre-tax)', 'console': 'AWS invoice basis (Services + tax)'}
+CONSOLE_EXPORT = os.path.join(HERE, 'AWS_Jan_Sep_Cost_per_Account.csv')
+EXACT, MKT_TAX_ONLY = 'Exact', 'Match (Mkt tax excl.)'   # reconciliation results
 METRIC = 'NetUnblendedCost'               # same metric as FinOps.ipynb
 CACHE_FILE = os.path.join(HERE, f'AWS_{BASIS_YEAR}_By_Account.csv')
 TOP_ACCOUNTS = 15
@@ -103,12 +111,14 @@ def rollup_session(session, token, account_id: str = ROLLUP_ACCOUNT_ID, region: 
 # --------------------------------------------------------------------------------------
 # Cost Explorer
 # --------------------------------------------------------------------------------------
-def _query(ce, start: str, end: str, group_by: list):
+def _query(ce, start: str, end: str, group_by: list, filter_: dict | None = None):
     """All pages of a MONTHLY get_cost_and_usage; returns (rows, dimension attributes)."""
     rows, attrs, token = [], {}, None
     while True:
         kw = dict(TimePeriod={'Start': start, 'End': end}, Granularity='MONTHLY', Metrics=[METRIC],
                   GroupBy=[{'Type': 'DIMENSION', 'Key': k} for k in group_by])
+        if filter_:
+            kw['Filter'] = filter_
         if token:
             kw['NextPageToken'] = token
         resp = ce.get_cost_and_usage(**kw)
@@ -132,6 +142,9 @@ def fetch_year(aws_session, year: int = BASIS_YEAR, include_current_month: bool 
 
     acct_rows, names = _query(ce, s, e, ['LINKED_ACCOUNT', 'SERVICE'])
     ent_rows, _ = _query(ce, s, e, ['SERVICE', 'BILLING_ENTITY'])
+    # tax per account split by what it was charged on (AWS services vs Marketplace purchases)
+    tax_rows, _ = _query(ce, s, e, ['LINKED_ACCOUNT', 'BILLING_ENTITY'],
+                         {'Dimensions': {'Key': 'SERVICE', 'Values': ['Tax']}})
 
     df = pd.DataFrame(acct_rows, columns=['Date', 'AccountId', 'Service', 'Cost'])
     ent = pd.DataFrame(ent_rows, columns=['Date', 'Service', 'BillingEntity', 'Cost'])
@@ -145,15 +158,89 @@ def fetch_year(aws_session, year: int = BASIS_YEAR, include_current_month: bool 
     df['Category'] = [TAX if sv == 'Tax' else MKT if isinstance(be, str) and 'Marketplace' in be
                       else (SVC if isinstance(be, str) else {fr.AWS: SVC, fr.MKT: MKT, fr.TAX: TAX}[fr.classify_service(sv)])
                       for sv, be in zip(df['Service'], df['BillingEntity'])]
+    df['TaxOn'] = ''
+    tax = pd.DataFrame(tax_rows, columns=['Date', 'AccountId', 'BillingEntity', 'Cost'])
+    if len(tax):
+        tax['Date'] = pd.to_datetime(tax['Date'])
+        tax['Service'], tax['Category'] = 'Tax', TAX
+        tax['TaxOn'] = np.where(tax['BillingEntity'].str.contains('Marketplace'), 'Marketplace', 'AWS')
+        tax['AccountName'] = tax['AccountId'].map(names).replace('', np.nan).fillna(tax['AccountId'])
+        df = pd.concat([df[df['Service'] != 'Tax'], tax], ignore_index=True)
     df['Partial'] = df['Date'] >= pd.Timestamp(first_this_month)
     df['PulledAt'] = datetime.now().isoformat(timespec='seconds')
-    return df[['Date', 'AccountId', 'AccountName', 'Service', 'BillingEntity', 'Category', 'Cost', 'Partial', 'PulledAt']]
+    return df[['Date', 'AccountId', 'AccountName', 'Service', 'BillingEntity', 'Category', 'TaxOn', 'Cost', 'Partial', 'PulledAt']]
 
 
-def load_cached(path: str = CACHE_FILE) -> pd.DataFrame:
-    df = pd.read_csv(path, dtype={'AccountId': str}, parse_dates=['Date'])
+def load_cached(path: str = CACHE_FILE, console_export: str | None = CONSOLE_EXPORT) -> pd.DataFrame:
+    df = pd.read_csv(path, dtype={'AccountId': str, 'TaxOn': str}, parse_dates=['Date'], keep_default_na=False,
+                     na_values={'Cost': ['']})
+    df['AccountId'] = df['AccountId'].str.zfill(12)
     df['Service'] = df['Service'].replace(fr.SERVICE_RENAMES)
+    if 'Partial' in df:
+        df['Partial'] = df['Partial'].astype(str).str.lower().eq('true')
+    if 'TaxOn' not in df:
+        df['TaxOn'] = ''
+    tax_unsplit = df['Category'].eq(TAX) & df['TaxOn'].isin(['', 'nan'])
+    if tax_unsplit.any() and console_export and os.path.exists(console_export):
+        df = split_tax_from_console(df, load_console_export(console_export))
     return df
+
+
+def load_console_export(path: str = CONSOLE_EXPORT) -> pd.DataFrame:
+    """Cost Explorer console CSV (rows = months, columns = linked accounts) -> long table Date, AccountId, AccountName, Console."""
+    raw = pd.read_csv(path, header=None, dtype=str, encoding='utf-8-sig', keep_default_na=False)
+    ids = [i.strip().zfill(12) if i.strip() else 'TOTAL' for i in raw.iloc[0, 1:]]
+    names = [n.replace(' ($)', '').strip() for n in raw.iloc[1, 1:]]
+    body = raw.iloc[2:].copy()
+    body.columns = ['Row'] + ids
+    body = body[body['Row'].str.match(r'\d{4}-\d{2}-\d{2}')]
+    long = body.melt(id_vars='Row', var_name='AccountId', value_name='Console')
+    long = long[long['AccountId'] != 'TOTAL']
+    long['Console'] = pd.to_numeric(long['Console'], errors='coerce').fillna(0.0)
+    long['Date'] = pd.to_datetime(long['Row'])
+    long['AccountName'] = long['AccountId'].map(dict(zip(ids, names)))
+    return long[['Date', 'AccountId', 'AccountName', 'Console']]
+
+
+def split_tax_from_console(df: pd.DataFrame, console: pd.DataFrame) -> pd.DataFrame:
+    """Split each account-month's Tax into tax on AWS services vs tax on Marketplace, using the console export
+    (console = Cloud Services + tax on AWS services, Marketplace excluded). Used only for pulls made before the
+    tax split query existed; new pulls get the split directly from Cost Explorer."""
+    key = ['Date', 'AccountId']
+    svc = df[df['Category'] == SVC].groupby(key)['Cost'].sum().rename('svc')
+    tax = df[df['Category'] == TAX].groupby(key)['Cost'].sum().rename('tax')
+    names = df.groupby('AccountId')['AccountName'].first()
+    j = pd.concat([svc, tax, console.set_index(key)['Console']], axis=1).fillna(0)
+    j['aws_tax'] = (j['Console'] - j['svc']).clip(lower=0)
+    j['aws_tax'] = np.minimum(j['aws_tax'], j['tax'].clip(lower=0))
+    j['mkt_tax'] = j['tax'] - j['aws_tax']
+    rows = []
+    for (d_, a), r in j.iterrows():
+        for on, v in (('AWS', r['aws_tax']), ('Marketplace', r['mkt_tax'])):
+            if abs(v) > 1e-9:
+                rows.append({'Date': d_, 'AccountId': a, 'AccountName': names.get(a, a), 'Service': 'Tax',
+                             'BillingEntity': 'AWS' if on == 'AWS' else 'AWS Marketplace', 'Category': TAX, 'TaxOn': on,
+                             'Cost': v, 'Partial': False})
+    out = pd.concat([df[df['Category'] != TAX], pd.DataFrame(rows)], ignore_index=True)
+    out['TaxOn'] = out['TaxOn'].fillna('')
+    return out
+
+
+def reconcile_with_console(df: pd.DataFrame, console: pd.DataFrame) -> pd.DataFrame:
+    """Per account: console export vs this pull. Uses TOTAL tax (not the split) so the check is independent."""
+    d = df[df['Date'].isin(console['Date'].unique())]
+    g = d.pivot_table(index='AccountId', columns='Category', values='Cost', aggfunc='sum').reindex(columns=[SVC, MKT, TAX]).fillna(0)
+    c = console.groupby('AccountId').agg(Account=('AccountName', 'first'), Console=('Console', 'sum'))
+    t = c.join(g, how='outer').fillna({'Console': 0, SVC: 0, MKT: 0, TAX: 0})
+    t['Account'] = t['Account'].fillna(d.groupby('AccountId')['AccountName'].first())
+    t['Services + all tax'] = t[SVC] + t[TAX]
+    t['Console − Services'] = t['Console'] - t[SVC]
+    t['Unexplained'] = t['Console'] - t['Services + all tax']
+    has_mkt = t[MKT].abs() > 1
+    t['Result'] = np.select([t['Unexplained'].abs() < 1, has_mkt & (t['Unexplained'] <= 0) & (-t['Unexplained'] <= t[TAX] + 1)],
+                            [EXACT, MKT_TAX_ONLY], 'CHECK')
+    t['AWS tax rate'] = (t['Console − Services'] / t[SVC].replace(0, np.nan)).clip(lower=0)
+    return t.sort_values('Console', ascending=False)
 
 
 def pull(include_current_month: bool = False, save: bool = True) -> pd.DataFrame:
@@ -270,14 +357,46 @@ class AWSForecast:
     mkt_detail: pd.DataFrame | None = None
     summary: dict = field(default_factory=dict)
     anomalies: pd.DataFrame | None = None
+    basis: str = BUDGET_BASIS
+    alt: dict = field(default_factory=dict)          # the same top-down forecast on the other budget basis
+    tax_rates: pd.Series | None = None               # per account: tax on AWS services / Cloud Services
+    aws_tax_eff: float = 0.0                         # forecast-weighted AWS tax rate
+    mkt_tax_rate: float = 0.0                        # tax on Marketplace / Marketplace
+    console_recon: pd.DataFrame | None = None
 
     @property
     def months(self) -> pd.DatetimeIndex:
         return self.horizon[self.horizon.year == FORECAST_YEAR]
 
 
-def forecast_2027(df: pd.DataFrame, budget: float = MONTHLY_BUDGET, top_accounts: int = TOP_ACCOUNTS) -> AWSForecast:
-    d = df[(df['Date'].dt.year == BASIS_YEAR) & ~df.get('Partial', False)].copy()
+def _topdown(s: pd.Series, gap: pd.Series, horizon: pd.DatetimeIndex) -> tuple[pd.DataFrame, float, float, float]:
+    """Low / Base / High from a monthly series (exit run-rate + Theil-Sen slope; gap = normalization for the trend only)."""
+    anchor, slope, raw_slope = s.tail(3).mean(), cf.theil_sen(s + gap), cf.theil_sen(s)
+    h = np.arange(1, len(horizon) + 1)
+    flat, damped, linear = np.full(len(h), anchor), anchor + slope * np.cumsum(cf.DAMPING ** h), anchor + slope * h
+    out = pd.DataFrame({'Low': np.minimum.reduce([flat, damped, linear]), 'Base': damped,
+                        'High': np.maximum.reduce([flat, damped, linear])}, index=horizon)
+    return out, anchor, slope, raw_slope
+
+
+def forecast_2027(df: pd.DataFrame, budget: float = MONTHLY_BUDGET, top_accounts: int = TOP_ACCOUNTS,
+                  budget_basis: str = BUDGET_BASIS, console: pd.DataFrame | None = None) -> AWSForecast:
+    """budget_basis 'services' = Cloud Services pre-tax; 'console' = Services + tax on AWS services (Cost Explorer
+    console with Marketplace excluded). Both are always computed; the chosen one drives the report."""
+    if budget_basis not in BASIS_LABEL:
+        raise ValueError(f'budget_basis must be one of {list(BASIS_LABEL)}')
+    d = df[(df['Date'].dt.year == BASIS_YEAR) & ~df['Partial'].astype(bool)].copy() if 'Partial' in df else \
+        df[df['Date'].dt.year == BASIS_YEAR].copy()
+    if 'TaxOn' not in d:
+        d['TaxOn'] = ''
+    aws_tax_mask = d['Category'].eq(TAX) & d['TaxOn'].eq('AWS')
+    if budget_basis == 'console' and not aws_tax_mask.any():
+        raise ValueError('console basis needs the AWS/Marketplace tax split — pull again or provide the console export')
+    pre_tax_svc = d[d['Category'] == SVC]
+    aws_tax = d[aws_tax_mask]
+    if budget_basis == 'console':                    # tax on AWS services becomes part of the budgeted line
+        d.loc[aws_tax_mask, 'Category'] = SVC
+        d.loc[aws_tax_mask, 'Service'] = 'Tax (on AWS services)'
     basis_start, basis_end = pd.Timestamp(f'{BASIS_YEAR}-01-01'), d['Date'].max()
     months_idx = pd.date_range(basis_start, basis_end, freq='MS')
     horizon = pd.date_range(basis_end + relativedelta(months=1), f'{FORECAST_YEAR}-12-01', freq='MS')
@@ -285,7 +404,8 @@ def forecast_2027(df: pd.DataFrame, budget: float = MONTHLY_BUDGET, top_accounts
     for c in (SVC, MKT, TAX):
         if c not in cat:
             cat[c] = 0.0
-    fc = AWSForecast(d, basis_start, basis_end, horizon, budget, cat[SVC], cat[MKT], cat[TAX])
+    fc = AWSForecast(d, basis_start, basis_end, horizon, budget, cat[SVC], cat[MKT], cat[TAX], basis=budget_basis)
+    fc.console_recon = reconcile_with_console(df, console) if console is not None else None
 
     # ---- Cloud Services, top-down (Savings Plans gap normalized for the trend only)
     sp = d[d['Service'] == fr.SP_NAME].groupby('Date')['Cost'].sum().reindex(months_idx).fillna(0)
@@ -293,11 +413,25 @@ def forecast_2027(df: pd.DataFrame, budget: float = MONTHLY_BUDGET, top_accounts
     gap = (typical - sp).where(sp < 0.5 * typical, 0)
     fc.normalization = gap[gap > 0]
     s = fc.svc_actual
-    anchor, slope, raw_slope = s.tail(3).mean(), cf.theil_sen(s + gap), cf.theil_sen(s)
-    h = np.arange(1, len(horizon) + 1)
-    flat, damped, linear = np.full(len(h), anchor), anchor + slope * np.cumsum(cf.DAMPING ** h), anchor + slope * h
-    fc.svc = pd.DataFrame({'Low': np.minimum.reduce([flat, damped, linear]), 'Base': damped,
-                           'High': np.maximum.reduce([flat, damped, linear])}, index=horizon)
+    fc.svc, anchor, slope, raw_slope = _topdown(s, gap, horizon)
+
+    # same forecast on the other basis, for comparison
+    pre = pre_tax_svc.groupby('Date')['Cost'].sum().reindex(months_idx).fillna(0)
+    atx = aws_tax.groupby('Date')['Cost'].sum().reindex(months_idx).fillna(0)
+    alt_basis = 'services' if budget_basis == 'console' else 'console'
+    if aws_tax_mask.any():
+        alt_s = pre if alt_basis == 'services' else pre + atx
+        alt_df, alt_anchor, _, _ = _topdown(alt_s, gap, horizon)
+        over = alt_df.loc[alt_df.index.year == FORECAST_YEAR, 'Base'] > budget
+        fc.alt = dict(basis=alt_basis, label=BASIS_LABEL[alt_basis], svc=alt_df, anchor=alt_anchor, ytd=alt_s.sum(),
+                      fy={sc: alt_df.loc[alt_df.index.year == FORECAST_YEAR, sc].sum() for sc in ('Low', 'Base', 'High')},
+                      first_over=over.idxmax() if over.any() else None, actual=alt_s)
+    # tax rates: AWS-service tax per account (pre-tax services), Marketplace tax overall
+    by_acc_svc = pre_tax_svc.groupby('AccountName')['Cost'].sum()
+    by_acc_tax = aws_tax.groupby('AccountName')['Cost'].sum()
+    fc.tax_rates = (by_acc_tax.reindex(by_acc_svc.index).fillna(0) / by_acc_svc.replace(0, np.nan)).fillna(0)
+    mkt_tax = d[d['Category'].eq(TAX) & d['TaxOn'].eq('Marketplace')]['Cost'].sum()
+    fc.mkt_tax_rate = mkt_tax / cat[MKT].sum() if cat[MKT].sum() and aws_tax_mask.any() else 0.0
     fc.params = dict(ytd=s.sum(), months=len(s), anchor=anchor, slope=slope, raw_slope=raw_slope,
                      first_half=s.iloc[:len(s) // 2].mean(), peak=s.max(), peak_month=s.idxmax(),
                      low=s.min(), low_month=s.idxmin(), months_over=int((s > budget).sum()),
@@ -332,6 +466,11 @@ def forecast_2027(df: pd.DataFrame, budget: float = MONTHLY_BUDGET, top_accounts
     t = pd.DataFrame(rows).set_index('Account')
     ytd_col = f'{BASIS_YEAR} Jan–{basis_end:%b}'
     t['Share'] = t[ytd_col] / t[ytd_col].sum()
+    # tax on AWS services: each account's own 2026 rate, weighted by its 2027 forecast
+    rest_rate = (by_acc_tax.reindex(rest).fillna(0).sum() / by_acc_svc.reindex(rest).fillna(0).sum()) if rest else 0.0
+    t['AWS tax rate'] = [fc.tax_rates.get(a, rest_rate if str(a).startswith('All other') else 0.0) for a in t.index]
+    fyc = f'FY{FORECAST_YEAR} forecast'
+    fc.aws_tax_eff = float((t[fyc] * t['AWS tax rate']).sum() / t[fyc].sum()) if t[fyc].sum() else 0.0
     fc.accounts = t
 
     # top services inside each top account
@@ -397,9 +536,17 @@ def _summarize(fc: AWSForecast) -> None:
     fy = {sc: fc.svc.loc[idx, sc].sum() for sc in ('Low', 'Base', 'High')}
     bud = fc.budget * 12
     mkt_fy = fc.mkt.loc[idx].sum()
-    tax_rate = fc.tax_actual.sum() / (fc.svc_actual.sum() + fc.mkt_actual.sum())
     bottom_up = fc.accounts[f'FY{FORECAST_YEAR} forecast'].sum()
-    S.update(fy=fy, budget=bud, mkt=mkt_fy, tax=(fy['Base'] + mkt_fy) * tax_rate, tax_rate=tax_rate, bottom_up=bottom_up,
+    if fc.tax_rates is not None and (fc.tax_rates > 0).any():
+        svc_tax = 0.0 if fc.basis == 'console' else fy['Base'] * fc.aws_tax_eff     # already inside on console basis
+        tax = svc_tax + mkt_fy * fc.mkt_tax_rate
+        tax_note = ((f'tax on AWS services ≈ {fc.aws_tax_eff:.1%} (each account\'s own rate) + tax on Marketplace ≈ '
+                     f'{fc.mkt_tax_rate:.1%}') if fc.basis == 'services' else
+                    f'tax on Marketplace ≈ {fc.mkt_tax_rate:.1%} (tax on AWS services is already in the budgeted line)')
+    else:                                            # no split available: one blended rate
+        rate = fc.tax_actual.sum() / (fc.svc_actual.sum() + fc.mkt_actual.sum())
+        tax, tax_note = (fy['Base'] + mkt_fy) * rate, f'blended {BASIS_YEAR} tax rate {rate:.1%}'
+    S.update(fy=fy, budget=bud, mkt=mkt_fy, tax=tax, tax_note=tax_note, bottom_up=bottom_up,
              combined={k: v + mkt_fy for k, v in fy.items()})
     over = fc.svc.loc[idx, 'Base'] > fc.budget
     S['first_over'] = over.idxmax() if over.any() else None
@@ -410,8 +557,28 @@ def _summarize(fc: AWSForecast) -> None:
     paras = []
 
     gap = fc.budget - p['anchor']
+    label = BASIS_LABEL[fc.basis]
+    if fc.alt:
+        a = fc.alt
+        avar = bud - a['fy']['Base']
+        lines = [f'This report compares the {_money(fc.budget)}/month budget to <b>{label}</b>. On the other basis '
+                 f'(<b>{a["label"]}</b>) the {FORECAST_YEAR} base is <b>{_money(a["fy"]["Base"])}</b> — '
+                 f'<span class="{"good" if avar >= 0 else "bad"}">{_money(abs(avar))} {"under" if avar >= 0 else "over"}</span> budget'
+                 + (f', crossing {_money(fc.budget)}/month in {a["first_over"]:%b %Y}' if a['first_over'] is not None else
+                    ', within the monthly budget all year')
+                 + f' (exit run-rate {_money(a["anchor"])}/month). <b>Confirm with Finance which basis the budget is tracked on.</b>']
+        rc = fc.console_recon
+        if rc is not None and len(rc):
+            exact = int((rc['Result'] == EXACT).sum())
+            mktm = rc[rc['Result'] == MKT_TAX_ONLY]
+            bad = int((rc['Result'] == 'CHECK').sum())
+            lines.append(f'Data check vs the Cost Explorer console export ({_money(rc["Console"].sum())} for '
+                         f'{mn}): <b>{exact + len(mktm)} of {len(rc)} accounts reconcile</b> — {exact} exactly to Services + tax, '
+                         f'{len(mktm)} ({", ".join(html.escape(x) for x in mktm["Account"])}) differ only by the tax on Marketplace '
+                         f'purchases, which the console view excludes' + (f'; <span class="bad">{bad} need review</span>' if bad else '') + '.')
+        paras.append(('Budget basis', lines))
     paras.append(('Where we start', [
-        f'AWS Cloud Services totaled <b>{_money(p["ytd"])}</b> for {mn} across <b>{n_acc} linked accounts</b> '
+        f'{label} totaled <b>{_money(p["ytd"])}</b> for {mn} across <b>{n_acc} linked accounts</b> '
         f'(pro-rated budget {_money(fc.budget * p["months"])} → {_money(fc.budget * p["months"] - p["ytd"])} '
         f'{"under" if p["ytd"] <= fc.budget * p["months"] else "over"}). Marketplace added {_money(fc.mkt_actual.sum())} '
         f'and tax {_money(fc.tax_actual.sum())}.',
@@ -476,8 +643,8 @@ def _summarize(fc: AWSForecast) -> None:
 
     paras.append(('Total AWS funding need', [
         f'Services (base) + Marketplace = <b>{_money(S["combined"]["Base"])}</b> '
-        f'(range {_money(S["combined"]["Low"])} – {_money(S["combined"]["High"])}); estimated tax at the {BASIS_YEAR} rate '
-        f'({tax_rate:.1%}) ≈ {_money(S["tax"])}, all-in ≈ <b>{_money(S["combined"]["Base"] + S["tax"])}</b>.',
+        f'(range {_money(S["combined"]["Low"])} – {_money(S["combined"]["High"])}); estimated tax ({tax_note}) '
+        f'≈ {_money(S["tax"])}, all-in ≈ <b>{_money(S["combined"]["Base"] + S["tax"])}</b>.',
     ]))
     an = fc.anomalies
     an_line = ([f'Data anomalies: {len(an)} account × service lines drop to near $0 in some months (≈ {_money(an["Missing vs typical"].sum())} '
@@ -603,6 +770,33 @@ def _anomaly_html(fc: AWSForecast) -> str:
             f'{fr._table(t, {"Typical /mo": _money, "Missing vs typical": _money})}</section>')
 
 
+def _console_html(fc: AWSForecast) -> str:
+    rc = fc.console_recon
+    if rc is None or not len(rc):
+        return ''
+    t = rc.set_index('Account')[['Console', SVC, TAX, MKT, 'Console − Services', 'Unexplained', 'AWS tax rate', 'Result']]
+    t = t.rename(columns={'Console': 'Console export', TAX: 'Tax (all)', 'Console − Services': 'Tax on AWS services'})
+    top = t.head(20)
+    others = t.iloc[20:]
+    fm = {c: _money for c in ['Console export', SVC, 'Tax (all)', MKT, 'Tax on AWS services', 'Unexplained']}
+    fm['AWS tax rate'] = lambda v: f'{v:.1%}' if pd.notna(v) else '—'
+    rates = rc[rc[SVC] > 50_000].sort_values('AWS tax rate')
+    zero = rates[rates['AWS tax rate'] < 0.001]
+    return (f'<section><h2>Reconciliation with the AWS console export</h2>'
+            f'<p class="lede">The console export (<code>{html.escape(os.path.basename(CONSOLE_EXPORT))}</code>) shows the <b>AWS</b> '
+            f'billing entity: Cloud Services plus the tax on them, with Marketplace and the tax on Marketplace excluded. '
+            f'Every account is compared with this pull using total tax, so the check is independent of the tax split.</p>'
+            f'<ul class="ins a"><li>Total: console {_money(rc["Console"].sum())} = Cloud Services {_money(rc[SVC].sum())} + tax on AWS '
+            f'services {_money(rc["Console − Services"].sum())} ({rc["Console − Services"].sum() / rc[SVC].sum():.2%}).</li>'
+            f'<li>Tax rates differ by account (billing address / tax status): '
+            + ', '.join(f'{html.escape(a)} {r["AWS tax rate"]:.1%}' for a, r in rates.set_index('Account').tail(3).iloc[::-1].iterrows())
+            + (f'; no tax on {", ".join(html.escape(a) for a in zero["Account"])}' if len(zero) else '')
+            + '. The forecast applies each account\'s own rate, so growth in a zero-tax account adds no tax.</li></ul>'
+            f'{fr._table(top, fm)}'
+            + (f'<details><summary>{len(others)} more accounts</summary>{fr._table(others, fm)}</details>' if len(others) else '')
+            + '</section>')
+
+
 def build_report(fc: AWSForecast, out_path: str | None = None, recon: pd.DataFrame | None = None) -> str:
     S, p = fc.summary, fc.params
     fy = f'FY{FORECAST_YEAR}'
@@ -612,12 +806,15 @@ def build_report(fc: AWSForecast, out_path: str | None = None, recon: pd.DataFra
         return f'<div class="tile"><div class="k">{k}</div><div class="v">{v}</div><div class="d">{d}</div></div>'
 
     var = S['budget'] - S['fy']['Base']
+    short = {'services': 'Cloud Services', 'console': 'AWS invoice (Services + tax)'}[fc.basis]
+    alt_line = (f'<br>{fc.alt["label"]}: {_money(fc.alt["fy"]["Base"])}' if fc.alt else '')
     tiles = '<div class="tiles">' + ''.join([
-        tile(f'{BASIS_YEAR} Cloud Services ({fc.basis_start:%b}–{fc.basis_end:%b})', _money(p['ytd']),
+        tile(f'{BASIS_YEAR} {short} ({fc.basis_start:%b}–{fc.basis_end:%b})', _money(p['ytd']),
              f'{fc.df.loc[fc.df["Category"] == SVC, "AccountId"].nunique()} linked accounts'),
         tile('Exit run-rate', _money(p['anchor']) + '/mo', f'{p["anchor"] / fc.budget:.0%} of {_money(fc.budget)} budget'),
-        tile(f'{fy} Services · base', _money(S['fy']['Base']),
-             f'<span class="{"good" if var >= 0 else "bad"}">{_money(abs(var))} {"under" if var >= 0 else "over"}</span> {_money(S["budget"])}'),
+        tile(f'{fy} {short} · base', _money(S['fy']['Base']),
+             f'<span class="{"good" if var >= 0 else "bad"}">{_money(abs(var))} {"under" if var >= 0 else "over"}</span> {_money(S["budget"])}'
+             + alt_line),
         tile(f'{fy} Marketplace', _money(S['mkt']), f'{BASIS_YEAR} billed {_money(fc.mkt_actual.sum())}'),
         tile(f'{fy} Combined · base', _money(S['combined']['Base']),
              f'range {_money(S["combined"]["Low"])}–{_money(S["combined"]["High"])}'),
@@ -629,6 +826,7 @@ def build_report(fc: AWSForecast, out_path: str | None = None, recon: pd.DataFra
     acc = fc.accounts.drop(columns=['FY range']).copy()     # ranges are shown in the account trend charts
     ytd_col = f'{BASIS_YEAR} Jan–{fc.basis_end:%b}'
     acc_html = fr._table(acc, {ytd_col: _money, 'Share': lambda v: f'{v:.0%}', 'Exit run-rate /mo': _money,
+                               'AWS tax rate': lambda v: f'{v:.1%}',
                                f'{fy} forecast': _money, 'Δ vs exit × 12': lambda v: '$0' if abs(v) < 500 else ('+' if v > 0 else '') + _money(v)})
     drill = ''
     for a, t in fc.account_services.items():
@@ -655,6 +853,7 @@ def build_report(fc: AWSForecast, out_path: str | None = None, recon: pd.DataFra
                       f'{fr._table(r, {r.columns[0]: _money, r.columns[1]: _money, "Difference": _money, "Difference %": lambda v: f"{v:+.2%}"})}'
                       f'</details>')
 
+    console_html = _console_html(fc)
     sm = SimpleNamespace(lines={'acct': fc.account_lines})
     figs = [chart_services(fc), chart_accounts_share(fc), fd.chart_small_multiples(sm, 'acct', C_SVC), chart_marketplace(fc), chart_combined(fc)]
     fh = [fr._fig_html(f, i == 0) for i, f in enumerate(figs)]
@@ -664,7 +863,7 @@ def build_report(fc: AWSForecast, out_path: str | None = None, recon: pd.DataFra
 <body><main>
 <header><div><h1>AWS {fy} Forecast — by Linked Account</h1>
 <p class="sub">Roll-up account {html.escape(ROLLUP_ACCOUNT_NAME)} ({ROLLUP_ACCOUNT_ID}) · basis {fc.basis_start:%b}–{fc.basis_end:%b %Y} only</p></div>
-<div class="meta">Cost Explorer · {METRIC} · Services budget {_money(fc.budget)}/mo<br>Generated {datetime.now():%Y-%m-%d %H:%M}</div></header>
+<div class="meta">Cost Explorer · {METRIC} · budget {_money(fc.budget)}/mo on {BASIS_LABEL[fc.basis]}<br>Generated {datetime.now():%Y-%m-%d %H:%M}</div></header>
 {tiles}
 <section><h2>Executive summary</h2>{summary}
 <details><summary>How the forecast is built</summary><ul class="ins a">
@@ -677,17 +876,18 @@ AWS vs Marketplace from <code>BILLING_ENTITY</code>.</li>
 <li><b>Marketplace:</b> each account × product repeats its {BASIS_YEAR} billing cadence and last amount.</li></ul></details>
 {recon_html}</section>
 
-<section><h2>a) Cloud Services — {fy} forecast</h2>{fh[0]}
+<section><h2>a) {short} — {fy} forecast</h2>{fh[0]}
 <h3>By quarter</h3>{cf._ftable(quarterly_table(fc), 'Quarter', var_cols=('Variance',))}
 <details><summary>By month</summary>{cf._ftable(mt, 'Month', var_cols=('Variance',))}</details></section>
 
-<section><h2>Cloud Services by linked account</h2>
+<section><h2>{short} by linked account</h2>
 <p class="lede">{fy} base forecast per account. Bottom-up total {_money(S['bottom_up'])} vs top-down {_money(S['fy']['Base'])}
 ({S['bottom_up'] / S['fy']['Base'] - 1:+.1%}).</p>{fh[1]}{acc_html}
 <h3>Account trends</h3>{fh[2]}
 <h3>Top services inside each account</h3>{drill}</section>
 
 {_anomaly_html(fc)}
+{console_html}
 <section><h2>b) Marketplace — {fy} forecast</h2>{fh[3]}<h3>Contract schedule (by account)</h3>{mk_html}</section>
 
 <section><h2>c) Combined — Services + Marketplace</h2>{fh[4]}</section>
@@ -702,6 +902,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--cached', action='store_true', help=f'use {os.path.basename(CACHE_FILE)} instead of calling AWS')
     ap.add_argument('--budget', type=float, default=MONTHLY_BUDGET)
+    ap.add_argument('--budget-basis', choices=list(BASIS_LABEL), default=BUDGET_BASIS,
+                    help="'services' = Cloud Services pre-tax; 'console' = Services + tax on AWS services (console view)")
+    ap.add_argument('--console-export', default=CONSOLE_EXPORT, help='Cost Explorer console CSV to reconcile against')
     ap.add_argument('--theme', choices=list(fr.THEMES), default='dark')
     ap.add_argument('--out')
     a = ap.parse_args(argv)
@@ -709,11 +912,20 @@ def main(argv=None):
     df = load_cached() if a.cached else pull()
     print('Owners file:', update_owner_file(df))
     recon = reconcile_with_monthly_files(df)
-    fc = forecast_2027(df, a.budget)
+    console = load_console_export(a.console_export) if a.console_export and os.path.exists(a.console_export) else None
+    fc = forecast_2027(df, a.budget, budget_basis=a.budget_basis, console=console)
+    if fc.console_recon is not None:
+        path = os.path.join(HERE, f'AWS_Console_Reconciliation_{BASIS_YEAR}.csv')
+        fc.console_recon.round(2).to_csv(path)
+        print('Console reconciliation:', path, '·', fc.console_recon['Result'].value_counts().to_dict())
     print('Report written:', build_report(fc, a.out, recon))
     S = fc.summary
-    print(f"FY{FORECAST_YEAR} Services base {_money(S['fy']['Base'])} (low {_money(S['fy']['Low'])}, high {_money(S['fy']['High'])}) "
-          f"vs budget {_money(S['budget'])} · Marketplace {_money(S['mkt'])} · bottom-up by account {_money(S['bottom_up'])}")
+    print(f"FY{FORECAST_YEAR} {BASIS_LABEL[fc.basis]} base {_money(S['fy']['Base'])} (low {_money(S['fy']['Low'])}, "
+          f"high {_money(S['fy']['High'])}) vs budget {_money(S['budget'])} · Marketplace {_money(S['mkt'])} · "
+          f"bottom-up by account {_money(S['bottom_up'])}")
+    if fc.alt:
+        print(f"   other basis — {fc.alt['label']}: {_money(fc.alt['fy']['Base'])}"
+              + (f", crosses budget {fc.alt['first_over']:%b %Y}" if fc.alt['first_over'] is not None else ''))
 
 
 if __name__ == '__main__':
